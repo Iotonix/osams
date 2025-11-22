@@ -1,154 +1,198 @@
 :root {
-    /* Light Mode Variables */
+    /* --- Global Colors --- */
     --bs-primary: #3699FF;
     --bs-success: #1BC5BD;
     --bs-danger: #F64E60;
     --bs-warning: #FFA800;
     --bs-body-bg: #F3F6F9;
     --bs-body-color: #212529;
-    /* Sidebar is ALWAYS dark regardless of theme */
-    --sidebar-bg: #1E1E2D;
-    --sidebar-text: #ffffff;
-    --sidebar-text-muted: #a2a3b7;
-    --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+
+    /* --- Sidebar Variables --- */
+    --sidebar-width: 260px;
+    --sidebar-bg: #1e1e2d;
+    --sidebar-text: #a2a3b7;
+    --sidebar-text-hover: #ffffff;
     --sidebar-active-bg: #1b1b29;
-    --sidebar-width: 250px;
+    --sidebar-accent: #3699FF;
 }
 
-/* Global rule: NO UNDERLINES in sidebar - EVER */
-#sidebar-wrapper * {
-    text-decoration: none !important;
-}
-
+/* --- Dark Mode Overrides --- */
 [data-bs-theme="dark"] {
-    /* Dark Mode Variables */
     --bs-body-bg: #151521;
     --bs-body-color: #e1e1e1;
     --bs-card-bg: #1e1e2d;
     --bs-border-color: #2b2b40;
-    /* Sidebar remains the same dark color */
 }
 
+/* --- Global Resets --- */
 body {
     background-color: var(--bs-body-bg);
     color: var(--bs-body-color);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
 }
 
-/* Sidebar Styles */
+/* =========================================
+   SIDEBAR STYLES (Fixed)
+   ========================================= */
+
 #wrapper {
-    overflow-x: hidden;
-    min-height: 100vh;
+    display: flex;
+    width: 100%;
+    align-items: stretch;
 }
 
 #sidebar-wrapper {
     min-height: 100vh;
-    margin-left: -15rem;
-    transition: margin .25s ease-out;
     width: var(--sidebar-width);
+    margin-left: -var(--sidebar-width);
     background-color: var(--sidebar-bg);
+    transition: margin 0.25s ease-out;
+    z-index: 1000;
+    flex-shrink: 0;
 }
 
-#sidebar-wrapper .sidebar-heading {
-    padding: 0.875rem 1.25rem;
-    font-size: 1.2rem;
-    background-color: rgba(0, 0, 0, 0.1);
-    color: var(--sidebar-text);
-}
-
-#sidebar-wrapper .list-group {
-    width: var(--sidebar-width);
-}
-
-#sidebar-wrapper .list-group-item {
-    background-color: transparent;
-    color: var(--sidebar-text-muted);
-    border: none;
-    font-weight: 500;
-    transition: all 0.15s ease;
-    text-decoration: none !important;
-    padding: 0.75rem 1.25rem;
-}
-
-#sidebar-wrapper .list-group-item:hover,
-#sidebar-wrapper .list-group-item:focus,
-#sidebar-wrapper .list-group-item:active,
-#sidebar-wrapper .list-group-item:visited {
-    color: var(--sidebar-text);
-    background-color: var(--sidebar-hover-bg);
-    text-decoration: none !important;
-    outline: none;
-}
-
-#sidebar-wrapper .list-group-item.active {
-    color: var(--sidebar-text);
-    background-color: var(--sidebar-active-bg);
-    border-left: 3px solid var(--bs-primary);
-    text-decoration: none !important;
-}
-
-/* Force remove underlines from all anchor tags and icons in sidebar */
+/* --- NUCLEAR RESET: KILL ALL UNDERLINES --- */
+/* This targets every link inside the sidebar ID, no matter what */
 #sidebar-wrapper a,
-#sidebar-wrapper a:link,
 #sidebar-wrapper a:hover,
 #sidebar-wrapper a:focus,
 #sidebar-wrapper a:active,
 #sidebar-wrapper a:visited,
-#sidebar-wrapper a i,
-#sidebar-wrapper a i:hover,
-#sidebar-wrapper a i:focus,
-#sidebar-wrapper .list-group-item,
-#sidebar-wrapper .list-group-item:link,
-#sidebar-wrapper .list-group-item:hover,
-#sidebar-wrapper .list-group-item:focus,
-#sidebar-wrapper .list-group-item:active,
-#sidebar-wrapper .list-group-item:visited {
+#sidebar-wrapper .sidebar-link,
+#sidebar-wrapper .sidebar-link:hover {
     text-decoration: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
 }
 
-#sidebar-wrapper .bi,
-#sidebar-wrapper i {
-    text-decoration: none !important;
+/* --- BULLET KILLER --- */
+#sidebar-wrapper ul,
+#sidebar-wrapper li {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin: 0 !important;
 }
 
-/* Submenu specific styling */
-.sidebar-submenu .list-group-item {
-    padding-left: 3.5rem !important;
-    font-size: 0.9rem;
-    border-left: 2px solid transparent;
-    transition: all 0.2s ease;
-    text-decoration: none !important;
-}
-
-.sidebar-submenu .list-group-item:hover {
-    border-left-color: var(--bs-primary);
-    text-decoration: none !important;
-}
-
-#page-content-wrapper {
-    min-width: 100vw;
-}
-
-body.sb-sidenav-toggled #sidebar-wrapper {
-    margin-left: 0;
-}
-
+/* Desktop: Show sidebar by default */
 @media (min-width: 768px) {
     #sidebar-wrapper {
         margin-left: 0;
     }
 
-    #page-content-wrapper {
-        min-width: 0;
-        width: 100%;
-    }
-
     body.sb-sidenav-toggled #sidebar-wrapper {
-        margin-left: -15rem;
+        margin-left: -var(--sidebar-width);
     }
 }
 
-/* Card Overrides for Dark Mode */
+/* Mobile: Toggled state shows it */
+@media (max-width: 767.98px) {
+    body.sb-sidenav-toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* Sidebar Heading */
+.sidebar-heading {
+    padding: 1.5rem 1.25rem;
+    font-size: 1.25rem;
+    color: var(--sidebar-text-hover);
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Link Styling --- */
+.sidebar-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1.5rem;
+    color: var(--sidebar-text);
+    transition: color 0.3s ease, background-color 0.3s ease;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    outline: none;
+    width: 100%;
+}
+
+/* Hover & Focus State */
+.sidebar-link:hover,
+.sidebar-link:focus {
+    color: var(--sidebar-text-hover);
+    background-color: rgba(255, 255, 255, 0.03);
+    border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Active State */
+.sidebar-link.active {
+    color: var(--sidebar-text-hover);
+    background-color: var(--sidebar-active-bg);
+    border-left-color: var(--sidebar-accent);
+}
+
+/* Icon Spacing */
+.sidebar-link i {
+    font-size: 1.1rem;
+    width: 1.5rem;
+    text-align: center;
+    margin-right: 0.75rem;
+    color: #5E6278;
+    transition: color 0.3s;
+}
+
+.sidebar-link:hover i,
+.sidebar-link.active i {
+    color: var(--sidebar-accent);
+}
+
+/* --- Submenu Styling --- */
+.submenu {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.submenu .sidebar-link {
+    padding-left: 3.5rem;
+    font-size: 0.9rem;
+    border-left: none;
+}
+
+/* Chevron Rotation */
+.chevron-icon {
+    margin-left: auto;
+    font-size: 0.8rem !important;
+    width: auto !important;
+    transition: transform 0.3s ease;
+}
+
+[aria-expanded="true"] .chevron-icon {
+    transform: rotate(180deg);
+}
+
+/* =========================================
+   OTHER GLOBAL STYLES
+   ========================================= */
+
+#page-content-wrapper {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar-light {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e4e6ef;
+}
+
+[data-bs-theme="dark"] .navbar-light {
+    background-color: #1e1e2d !important;
+    border-bottom-color: #2b2b40 !important;
+}
+
+/* Cards & Tables */
 [data-bs-theme="dark"] .card {
     background-color: var(--bs-card-bg);
     border-color: var(--bs-border-color);
@@ -165,130 +209,12 @@ body.sb-sidenav-toggled #sidebar-wrapper {
     --bs-table-color: #fff;
 }
 
-/* Navbar */
-.navbar-light {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #e4e6ef;
-}
-
-.navbar-light .navbar-brand,
-.navbar-light .nav-link,
-.navbar-light .btn-link {
-    color: #3f4254;
-}
-
-.navbar-light .btn-primary {
-    color: #ffffff;
-}
-
-[data-bs-theme="dark"] .navbar-light {
-    background-color: #1e1e2d !important;
-    border-bottom-color: #2b2b40 !important;
-}
-
-[data-bs-theme="dark"] .navbar-light .navbar-brand,
-[data-bs-theme="dark"] .navbar-light .nav-link,
-[data-bs-theme="dark"] .navbar-light .btn-link {
-    color: #e1e1e1;
-}
-
-/* Login Page Styles */
+/* Login Card */
 .login-card {
-    background-color: var(--bs-body-bg);
+    background-color: #ffffff;
     border-radius: 16px;
 }
 
 [data-bs-theme="dark"] .login-card {
     background-color: var(--bs-card-bg);
-}
-
-.login-logo {
-    max-width: 120px;
-    height: auto;
-}
-
-.login-card .form-control {
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    border: 1px solid #e4e6ef;
-}
-
-[data-bs-theme="dark"] .login-card .form-control {
-    background-color: #1b1b29;
-    border-color: #2b2b40;
-    color: #e1e1e1;
-}
-
-.login-card .input-group-text {
-    background-color: transparent;
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-    border-color: #e4e6ef;
-}
-
-[data-bs-theme="dark"] .login-card .input-group-text {
-    background-color: #1b1b29;
-    border-color: #2b2b40;
-    color: #a2a3b7;
-}
-
-.login-card .form-control:focus {
-    border-color: var(--bs-primary);
-    box-shadow: 0 0 0 0.25rem rgba(54, 153, 255, 0.15);
-}
-
-.login-card .input-group .form-control {
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-}
-
-.login-card .btn-primary {
-    border-radius: 8px;
-    padding: 0.75rem;
-    font-weight: 500;
-}
-
-/* Sidebar Collapsible Sections */
-.sidebar-section {
-    position: relative;
-}
-
-.submenu-dot {
-    display: none !important;
-}
-
-.chevron-icon {
-    transition: transform 0.3s ease;
-    font-size: 0.8rem;
-}
-
-.collapsed .chevron-icon {
-    transform: rotate(0deg);
-}
-
-[aria-expanded="true"] .chevron-icon {
-    transform: rotate(180deg);
-}
-
-/* Keep Master Data menu open */
-#masterDataMenu {
-    transition: none !important;
-}
-
-#masterDataMenu.show {
-    display: block !important;
-}
-
-/* Smooth collapse animation for other menus */
-.sidebar-submenu:not(#masterDataMenu) {
-    transition: all 0.3s ease-in-out;
-}
-
-.sidebar-submenu:not(#masterDataMenu).collapsing {
-    transition: height 0.3s ease;
-}
-
-/* Adjust sidebar background for sections */
-.bg-sidebar {
-    background-color: var(--sidebar-bg);
 }
