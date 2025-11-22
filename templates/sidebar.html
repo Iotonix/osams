@@ -1,31 +1,170 @@
 {% load static %}
 <div class="border-end bg-sidebar" id="sidebar-wrapper">
-    <div
-        class="sidebar-heading border-bottom bg-sidebar text-white d-flex align-items-center justify-content-center py-3">
+    <div class="sidebar-heading border-bottom bg-sidebar text-white d-flex align-items-center justify-content-center py-3">
         <img src="{% static 'img/logo.png' %}" alt="OS-AMS Logo" height="40" class="me-2">
         <span class="fw-bold">OS-AMS</span>
     </div>
     <div class="list-group list-group-flush">
-        <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action list-group-item-light p-3 active">
-            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+        <!-- Dashboard - Always visible -->
+        <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action {% if request.path == '/' %}active{% endif %}">
+            <i class="bi bi-speedometer2 me-2"></i>Dashboard
         </a>
-        <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3">
-            <i class="bi bi-airplane me-2"></i> Flights
-        </a>
-        <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3">
-            <i class="bi bi-calendar-check me-2"></i> Schedule
-        </a>
-        <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3">
-            <i class="bi bi-door-open me-2"></i> Gates
-        </a>
-        <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3">
-            <i class="bi bi-display me-2"></i> FIDS
-        </a>
-        <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3">
-            <i class="bi bi-cash-coin me-2"></i> Billing
-        </a>
-        <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3">
-            <i class="bi bi-gear me-2"></i> Settings
+
+        <!-- Flight Operations -->
+        <div class="sidebar-section">
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center collapsed" 
+               data-bs-toggle="collapse" href="#flightOpsMenu" role="button" aria-expanded="false">
+                <span><i class="bi bi-airplane-fill me-2"></i>Flight Operations</span>
+                <i class="bi bi-chevron-down chevron-icon"></i>
+            </a>
+            <div class="collapse sidebar-submenu" id="flightOpsMenu">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Live Status
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Turnaround Monitor
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Delays & Disruptions
+                </a>
+            </div>
+        </div>
+
+        <!-- Flight Planning -->
+        <div class="sidebar-section">
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center collapsed" 
+               data-bs-toggle="collapse" href="#planningMenu" role="button" aria-expanded="false">
+                <span><i class="bi bi-calendar3 me-2"></i>Flight Planning</span>
+                <i class="bi bi-chevron-down chevron-icon"></i>
+            </a>
+            <div class="collapse sidebar-submenu" id="planningMenu">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Schedule Browser
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Import SSIM
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Seasonal Planning
+                </a>
+            </div>
+        </div>
+
+        <!-- Resource Management -->
+        <div class="sidebar-section">
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center collapsed" 
+               data-bs-toggle="collapse" href="#resourceMenu" role="button" aria-expanded="false">
+                <span><i class="bi bi-diagram-3-fill me-2"></i>Resource Management</span>
+                <i class="bi bi-chevron-down chevron-icon"></i>
+            </a>
+            <div class="collapse sidebar-submenu" id="resourceMenu">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Gate Allocation
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Check-in Assignment
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Stand Management
+                </a>
+            </div>
+        </div>
+
+        <!-- FIDS -->
+        <div class="sidebar-section">
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center collapsed" 
+               data-bs-toggle="collapse" href="#fidsMenu" role="button" aria-expanded="false">
+                <span><i class="bi bi-tv-fill me-2"></i>FIDS</span>
+                <i class="bi bi-chevron-down chevron-icon"></i>
+            </a>
+            <div class="collapse sidebar-submenu" id="fidsMenu">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Departures Board
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Arrivals Board
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Display Configuration
+                </a>
+            </div>
+        </div>
+
+        <!-- Master Data -->
+        <div class="sidebar-section">
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center collapsed" 
+               data-bs-toggle="collapse" href="#masterDataMenu" role="button" aria-expanded="false">
+                <span><i class="bi bi-database-fill me-2"></i>Master Data</span>
+                <i class="bi bi-chevron-down chevron-icon"></i>
+            </a>
+            <div class="collapse sidebar-submenu" id="masterDataMenu">
+                <a href="{% url 'admin:masterdata_airline_changelist' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Airlines
+                </a>
+                <a href="{% url 'admin:masterdata_aircrafttype_changelist' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Aircraft Types
+                </a>
+                <a href="{% url 'admin:masterdata_terminal_changelist' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Terminals
+                </a>
+                <a href="{% url 'admin:masterdata_gate_changelist' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Gates
+                </a>
+                <a href="{% url 'admin:masterdata_stand_changelist' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Stands
+                </a>
+                <a href="{% url 'admin:masterdata_checkincounter_changelist' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Check-in Counters
+                </a>
+                <a href="{% url 'admin:masterdata_baggagecarousel_changelist' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Baggage Carousels
+                </a>
+            </div>
+        </div>
+
+        <!-- Billing -->
+        <div class="sidebar-section">
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center collapsed" 
+               data-bs-toggle="collapse" href="#billingMenu" role="button" aria-expanded="false">
+                <span><i class="bi bi-currency-dollar me-2"></i>Billing</span>
+                <i class="bi bi-chevron-down chevron-icon"></i>
+            </a>
+            <div class="collapse sidebar-submenu" id="billingMenu">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Charge Calculation
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Invoices
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Rate Cards
+                </a>
+            </div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="sidebar-section">
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center collapsed" 
+               data-bs-toggle="collapse" href="#analyticsMenu" role="button" aria-expanded="false">
+                <span><i class="bi bi-bar-chart-fill me-2"></i>Analytics</span>
+                <i class="bi bi-chevron-down chevron-icon"></i>
+            </a>
+            <div class="collapse sidebar-submenu" id="analyticsMenu">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Operations Dashboard
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Performance Reports
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-circle-fill me-2 submenu-dot"></i>Historical Analysis
+                </a>
+            </div>
+        </div>
+
+        <!-- Admin Panel - Bottom -->
+        <a href="{% url 'admin:index' %}" class="list-group-item list-group-item-action mt-3">
+            <i class="bi bi-gear-fill me-2"></i>Admin Panel
         </a>
     </div>
 </div>

@@ -196,3 +196,51 @@ body.sb-sidenav-toggled #sidebar-wrapper {
     padding: 0.75rem;
     font-weight: 500;
 }
+
+/* Sidebar Collapsible Sections */
+.sidebar-section {
+    position: relative;
+}
+
+.sidebar-submenu .list-group-item {
+    padding-left: 3.5rem !important;
+    font-size: 0.9rem;
+    border-left: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.sidebar-submenu .list-group-item:hover {
+    border-left-color: var(--bs-primary);
+}
+
+.submenu-dot {
+    font-size: 6px;
+    vertical-align: middle;
+}
+
+.chevron-icon {
+    transition: transform 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.collapsed .chevron-icon {
+    transform: rotate(0deg);
+}
+
+[aria-expanded="true"] .chevron-icon {
+    transform: rotate(180deg);
+}
+
+/* Smooth collapse animation */
+.sidebar-submenu {
+    transition: all 0.3s ease-in-out;
+}
+
+.sidebar-submenu.collapsing {
+    transition: height 0.3s ease;
+}
+
+/* Adjust sidebar background for sections */
+.bg-sidebar {
+    background-color: var(--sidebar-bg);
+}
