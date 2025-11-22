@@ -1,3 +1,5 @@
 .venv/
 .databases/pgdata/
 __pycache__/
+*.pyc 
+.env
