@@ -83,16 +83,18 @@ document.addEventListener('DOMContentLoaded', event => {
 
     // Fix active state - only highlight current page in submenu
     const currentPath = window.location.pathname;
-    const sidebarLinks = document.querySelectorAll('#sidebar-wrapper .sidebar-submenu a.list-group-item');
+    const sidebarLinks = document.querySelectorAll('#sidebar-wrapper .sidebar-submenu a');
 
+    // Remove active from ALL submenu links first
+    sidebarLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Add active only to the exact matching link
     sidebarLinks.forEach(link => {
         const linkHref = link.getAttribute('href');
-
-        // Only add active class if this is the exact current page
-        if (linkHref && linkHref === currentPath) {
+        if (linkHref === currentPath) {
             link.classList.add('active');
-        } else {
-            link.classList.remove('active');
         }
     });
 
