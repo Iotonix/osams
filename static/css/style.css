@@ -61,17 +61,26 @@ body {
     border: none;
     font-weight: 500;
     transition: all 0.15s ease;
+    text-decoration: none !important;
+    padding: 0.75rem 1.25rem;
 }
 
 #sidebar-wrapper .list-group-item:hover {
     color: var(--sidebar-text);
     background-color: var(--sidebar-hover-bg);
+    text-decoration: none !important;
+}
+
+#sidebar-wrapper .list-group-item:focus {
+    text-decoration: none !important;
+    outline: none;
 }
 
 #sidebar-wrapper .list-group-item.active {
     color: var(--sidebar-text);
     background-color: var(--sidebar-active-bg);
     border-left: 3px solid var(--bs-primary);
+    text-decoration: none !important;
 }
 
 #page-content-wrapper {
