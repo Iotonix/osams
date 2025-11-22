@@ -22,17 +22,20 @@
 ## 🚀 Technology Stack
 
 ### Backend
+
 - **Framework:** Django 5.2
 - **Language:** Python 3.12
 - **Architecture:** Modular Monolith
 - **API:** REST (planned: Django REST Framework)
 
 ### Database
+
 - **Primary:** TimescaleDB (PostgreSQL 16-based)
   - Optimized for time-series flight tracking and resource utilization logs
 - **Cache:** Redis (for Celery task queue and Django Channels)
 
 ### Frontend
+
 - **Framework:** Bootstrap 5
 - **Icons:** Bootstrap Icons
 - **Charts:** Chart.js
@@ -40,6 +43,7 @@
 - **Theme:** Custom light/dark mode
 
 ### DevOps
+
 - **Containerization:** Docker & Docker Compose
 - **Database:** TimescaleDB container
 - **Web Server:** Gunicorn (production)
@@ -90,33 +94,39 @@ osams/
 ### Quick Start
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Iotonix/osams.git
    cd osams
    ```
 
 2. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 3. **Start the database**
+
    ```bash
    docker-compose up -d timescaledb
    ```
 
 4. **Install Python dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 5. **Run database migrations**
+
    ```bash
    python manage.py migrate
    ```
 
 6. **Create a superuser**
+
    ```bash
    ./create_superuser.sh
    # Or manually:
@@ -124,30 +134,34 @@ osams/
    ```
 
 7. **Start the development server**
+
    ```bash
    python manage.py runserver
    ```
 
 8. **Access the application**
-   - Login: http://localhost:8000/login/
-   - Dashboard: http://localhost:8000/
-   - Admin: http://localhost:8000/admin/
+   - Login: <http://localhost:8000/login/>
+   - Dashboard: <http://localhost:8000/>
+   - Admin: <http://localhost:8000/admin/>
 
 ### Default Credentials
 
 After running `create_superuser.sh`:
+
 - **Username:** admin
 - **Password:** admin123
-- **Email:** ralf.hundertmark@yahoo.com
+- **Email:** <ralf.hundertmark@yahoo.com>
 
 ## 🐳 Docker Deployment
 
 ### Build the image
+
 ```bash
 ./build_manually.sh
 ```
 
 ### Run with Docker Compose
+
 ```bash
 docker-compose up -d
 ```
@@ -163,6 +177,7 @@ The system uses **TimescaleDB** for optimized time-series data handling:
 - **Host:** localhost (development) / timescaledb (Docker)
 
 Configuration is managed via `.env` file:
+
 ```env
 POSTGRES_DB=osams
 POSTGRES_USER=pgadmin
@@ -192,11 +207,13 @@ OS-AMS features a modern dual-theme interface:
 ## 🔧 Development
 
 ### Running Tests
+
 ```bash
 python manage.py test
 ```
 
 ### Code Style
+
 ```bash
 # Format code
 black .
@@ -206,6 +223,7 @@ flake8 .
 ```
 
 ### Database Shell
+
 ```bash
 # Django shell
 python manage.py shell
