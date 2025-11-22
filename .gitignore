@@ -1,0 +1,3 @@
+.venv/
+.databases/pgdata/
+__pycache__/

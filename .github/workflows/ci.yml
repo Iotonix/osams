@@ -1,0 +1,76 @@
+name: CI/CD Python Build & Deploy
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: hugo
+      IMAGE_VERSION: "0.4"
+      REGISTRY: registry.ait.co.th/iotonix
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🔍 Debug Environment Variables & Secrets
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "✅ Checking environment variables:"
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
+          echo "IMAGE_VERSION=${{ env.IMAGE_VERSION }}"
+          echo "REGISTRY=${{ env.REGISTRY }}"
+
+          echo "✅ Checking if secrets are set:"
+          if [[ -z "$DOCKER_USERNAME" ]]; then
+            echo "❌ ERROR: DOCKER_USERNAME is NOT set!"
+            exit 1
+          else
+            echo "✅ DOCKER_USERNAME is set (Length: ${#DOCKER_USERNAME})"
+          fi
+
+          if [[ -z "$DOCKER_PASSWORD" ]]; then
+            echo "❌ ERROR: DOCKER_PASSWORD is NOT set!"
+            exit 1
+          else
+            echo "✅ DOCKER_PASSWORD is set (Length: ${#DOCKER_PASSWORD})"
+          fi
+
+      - name: Docker login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo "$DOCKER_PASSWORD" | docker login "${{ env.REGISTRY }}" --username "$DOCKER_USERNAME" --password-stdin
+
+      - name: Set SHORT_SHA
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: List build context
+        run: |
+          echo "== repo root =="
+          find . -maxdepth 2 | sort
+          echo "== src dir =="
+          find src -maxdepth 1 | sort
+
+      - name: Build & tag image
+        run: |
+          docker build --no-cache \
+            -t ${IMAGE_NAME}:${IMAGE_VERSION} \
+            -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION} \
+            -t ${REGISTRY}/${IMAGE_NAME}:$SHORT_SHA \
+            -t ${REGISTRY}/${IMAGE_NAME}:latest \
+            .
+
+      - name: Push version tag
+        run: docker push "${REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}"
+
+      - name: Push SHA tag
+        run: docker push "${REGISTRY}/${IMAGE_NAME}:$SHORT_SHA"
+
+      - name: Push latest tag
+        run: docker push "${REGISTRY}/${IMAGE_NAME}:latest"
