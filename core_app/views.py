@@ -6,27 +6,27 @@ from django.contrib import messages
 
 def user_login(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
-    
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
-        
+
         if user is not None:
             login(request, user)
-            next_url = request.POST.get('next') or request.GET.get('next') or 'dashboard'
+            next_url = request.POST.get("next") or request.GET.get("next") or "dashboard"
             return redirect(next_url)
         else:
-            messages.error(request, 'Invalid username or password.')
-    
-    return render(request, 'login.html')
+            messages.error(request, "Invalid username or password.")
+
+    return render(request, "login.html")
 
 
 def user_logout(request):
     logout(request)
-    messages.success(request, 'You have been successfully logged out.')
-    return redirect('login')
+    messages.success(request, "You have been successfully logged out.")
+    return redirect("login")
 
 
 @login_required
