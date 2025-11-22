@@ -11,7 +11,7 @@
 #     - POSTGRES_PORT=5432
 #     - POSTGRES_DB=hugo
 #     - POSTGRES_USER=ait
-#     - POSTGRES_PASSWORD="ait1234"
+#     - POSTGRES_PASSWORD=""
 #     - OLLAMA_SERVER_URL=http://10.0.0.180:11434
 #     - LOGLEVEL=DEBUG
 #   command: python manage.py runserver
@@ -30,7 +30,7 @@ timescaledb:
   environment:
     - POSTGRES_DB=hugo
     - POSTGRES_USER=ait
-    - POSTGRES_PASSWORD="ait1234"
+    - POSTGRES_PASSWORD=""
   volumes:
     - TimescaleDBVolume:/var/lib/postgresql/data
   profiles: ["dev"]
