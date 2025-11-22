@@ -65,13 +65,12 @@ body {
     padding: 0.75rem 1.25rem;
 }
 
-#sidebar-wrapper .list-group-item:hover {
+#sidebar-wrapper .list-group-item:hover,
+#sidebar-wrapper .list-group-item:focus,
+#sidebar-wrapper .list-group-item:active,
+#sidebar-wrapper .list-group-item:visited {
     color: var(--sidebar-text);
     background-color: var(--sidebar-hover-bg);
-    text-decoration: none !important;
-}
-
-#sidebar-wrapper .list-group-item:focus {
     text-decoration: none !important;
     outline: none;
 }
@@ -80,6 +79,29 @@ body {
     color: var(--sidebar-text);
     background-color: var(--sidebar-active-bg);
     border-left: 3px solid var(--bs-primary);
+    text-decoration: none !important;
+}
+
+/* Force remove underlines from all anchor tags in sidebar */
+#sidebar-wrapper a,
+#sidebar-wrapper a:hover,
+#sidebar-wrapper a:focus,
+#sidebar-wrapper a:active,
+#sidebar-wrapper a:visited {
+    text-decoration: none !important;
+}
+
+/* Submenu specific styling */
+.sidebar-submenu .list-group-item {
+    padding-left: 3.5rem !important;
+    font-size: 0.9rem;
+    border-left: 2px solid transparent;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+}
+
+.sidebar-submenu .list-group-item:hover {
+    border-left-color: var(--bs-primary);
     text-decoration: none !important;
 }
 
@@ -211,17 +233,6 @@ body.sb-sidenav-toggled #sidebar-wrapper {
     position: relative;
 }
 
-.sidebar-submenu .list-group-item {
-    padding-left: 3.5rem !important;
-    font-size: 0.9rem;
-    border-left: 2px solid transparent;
-    transition: all 0.2s ease;
-}
-
-.sidebar-submenu .list-group-item:hover {
-    border-left-color: var(--bs-primary);
-}
-
 .submenu-dot {
     font-size: 6px;
     vertical-align: middle;
@@ -240,12 +251,21 @@ body.sb-sidenav-toggled #sidebar-wrapper {
     transform: rotate(180deg);
 }
 
-/* Smooth collapse animation */
-.sidebar-submenu {
+/* Keep Master Data menu open */
+#masterDataMenu {
+    transition: none !important;
+}
+
+#masterDataMenu.show {
+    display: block !important;
+}
+
+/* Smooth collapse animation for other menus */
+.sidebar-submenu:not(#masterDataMenu) {
     transition: all 0.3s ease-in-out;
 }
 
-.sidebar-submenu.collapsing {
+.sidebar-submenu:not(#masterDataMenu).collapsing {
     transition: height 0.3s ease;
 }
 
