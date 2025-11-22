@@ -44,31 +44,56 @@ document.addEventListener('DOMContentLoaded', event => {
     // Sidebar Menu Persistence
     // Keep Master Data menu always open
     const masterDataMenu = document.getElementById('masterDataMenu');
-    const masterDataToggle = document.querySelector('[data-bs-target="#masterDataMenu"]');
+    const masterDataToggle = document.querySelector('[href="#masterDataMenu"]');
 
     if (masterDataMenu && masterDataToggle) {
-        // Always show Master Data menu
+        // Force Master Data menu to stay open
         masterDataMenu.classList.add('show');
         masterDataToggle.setAttribute('aria-expanded', 'true');
+        masterDataToggle.classList.remove('collapsed');
 
-        // Store all collapse states
+        // Prevent Master Data menu from collapsing
+        masterDataToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+
+        // Store all collapse states for other menus
         const collapseElements = document.querySelectorAll('.collapse');
         collapseElements.forEach(collapse => {
-            collapse.addEventListener('shown.bs.collapse', function () {
-                localStorage.setItem('collapse_' + this.id, 'open');
-            });
+            if (collapse.id !== 'masterDataMenu') {
+                collapse.addEventListener('shown.bs.collapse', function () {
+                    localStorage.setItem('collapse_' + this.id, 'open');
+                });
 
-            collapse.addEventListener('hidden.bs.collapse', function () {
-                localStorage.setItem('collapse_' + this.id, 'closed');
-            });
+                collapse.addEventListener('hidden.bs.collapse', function () {
+                    localStorage.setItem('collapse_' + this.id, 'closed');
+                });
 
-            // Restore state from localStorage
-            const savedState = localStorage.getItem('collapse_' + collapse.id);
-            if (savedState === 'open' && !collapse.classList.contains('show')) {
-                const bsCollapse = new bootstrap.Collapse(collapse, { toggle: false });
-                bsCollapse.show();
+                // Restore state from localStorage
+                const savedState = localStorage.getItem('collapse_' + collapse.id);
+                if (savedState === 'open' && !collapse.classList.contains('show')) {
+                    const bsCollapse = new bootstrap.Collapse(collapse, { toggle: false });
+                    bsCollapse.show();
+                }
             }
         });
     }
+
+    // Fix active state - only highlight current page in submenu
+    const currentPath = window.location.pathname;
+    const sidebarLinks = document.querySelectorAll('#sidebar-wrapper .sidebar-submenu a.list-group-item');
+
+    sidebarLinks.forEach(link => {
+        const linkHref = link.getAttribute('href');
+
+        // Only add active class if this is the exact current page
+        if (linkHref && linkHref === currentPath) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
 
 });

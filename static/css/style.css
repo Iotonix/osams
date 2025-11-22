@@ -15,6 +15,11 @@
     --sidebar-width: 250px;
 }
 
+/* Global rule: NO UNDERLINES in sidebar - EVER */
+#sidebar-wrapper * {
+    text-decoration: none !important;
+}
+
 [data-bs-theme="dark"] {
     /* Dark Mode Variables */
     --bs-body-bg: #151521;
@@ -82,12 +87,27 @@ body {
     text-decoration: none !important;
 }
 
-/* Force remove underlines from all anchor tags in sidebar */
+/* Force remove underlines from all anchor tags and icons in sidebar */
 #sidebar-wrapper a,
+#sidebar-wrapper a:link,
 #sidebar-wrapper a:hover,
 #sidebar-wrapper a:focus,
 #sidebar-wrapper a:active,
-#sidebar-wrapper a:visited {
+#sidebar-wrapper a:visited,
+#sidebar-wrapper a i,
+#sidebar-wrapper a i:hover,
+#sidebar-wrapper a i:focus,
+#sidebar-wrapper .list-group-item,
+#sidebar-wrapper .list-group-item:link,
+#sidebar-wrapper .list-group-item:hover,
+#sidebar-wrapper .list-group-item:focus,
+#sidebar-wrapper .list-group-item:active,
+#sidebar-wrapper .list-group-item:visited {
+    text-decoration: none !important;
+}
+
+#sidebar-wrapper .bi,
+#sidebar-wrapper i {
     text-decoration: none !important;
 }
 
@@ -234,8 +254,7 @@ body.sb-sidenav-toggled #sidebar-wrapper {
 }
 
 .submenu-dot {
-    font-size: 6px;
-    vertical-align: middle;
+    display: none !important;
 }
 
 .chevron-icon {
