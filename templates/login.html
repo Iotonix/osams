@@ -3,75 +3,85 @@
 
 {% block title %}Login - OS-AMS{% endblock %}
 
+{% block extra_css %}
+<style>
+    body {
+        background-color: #151521 !important;
+        background-image: radial-gradient(circle at 50% 0%, #1e1e2d 0%, #151521 70%);
+    }
+    .login-wrapper {
+        width: 100%;
+        max-width: 400px;
+        padding: 1rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
-            <div class="card shadow-lg border-0 login-card">
-                <div class="card-body p-5">
-                    <!-- Logo -->
-                    <div class="text-center mb-4">
-                        <img src="{% static 'img/logo.png' %}" alt="OS-AMS Logo" class="login-logo mb-3">
-                        <h3 class="mb-1">OS-AMS</h3>
-                        <p class="text-muted">Airport Management System</p>
+<div class="login-wrapper">
+    <div class="card shadow-lg border-0 login-card">
+        <div class="card-body p-4 p-sm-5">
+            <!-- Logo -->
+            <div class="text-center mb-4">
+                <img src="{% static 'img/logo.png' %}" alt="OS-AMS Logo" class="login-logo mb-3">
+                <h3 class="mb-1 fw-bold">OS-AMS</h3>
+                <p class="text-muted small">Airport Management System</p>
+            </div>
+
+            <!-- Error Messages -->
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                Invalid credentials.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show small" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Login Form -->
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label small fw-bold text-muted text-uppercase">User ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                        <input type="text" class="form-control bg-light border-start-0 ps-0" id="username" name="username" 
+                               placeholder="Enter ID" required autofocus>
                     </div>
-
-                    <!-- Error Messages -->
-                    {% if form.errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-circle me-2"></i>
-                        Invalid username or password.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    {% endif %}
-
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-
-                    <!-- Login Form -->
-                    <form method="post" action="{% url 'login' %}">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="username" class="form-label">User ID</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control" id="username" name="username" 
-                                       placeholder="Enter your user ID" required autofocus>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="password" class="form-label">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control" id="password" name="password" 
-                                       placeholder="Enter your password" required>
-                            </div>
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-                            </button>
-                        </div>
-
-                        <input type="hidden" name="next" value="{{ next }}">
-                    </form>
                 </div>
-            </div>
 
-            <!-- Footer -->
-            <div class="text-center mt-4 text-muted">
-                <small>&copy; 2025 OS-AMS. All rights reserved.</small>
-            </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label small fw-bold text-muted text-uppercase">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                        <input type="password" class="form-control bg-light border-start-0 ps-0" id="password" name="password" 
+                               placeholder="Enter Password" required>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary py-2 fw-bold">
+                        Sign In
+                    </button>
+                </div>
+
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
         </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center mt-4 text-muted opacity-50">
+        <small>&copy; 2025 OS-AMS</small>
     </div>
 </div>
 {% endblock %}
