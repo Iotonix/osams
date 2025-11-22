@@ -41,4 +41,34 @@ document.addEventListener('DOMContentLoaded', event => {
         }
     }
 
+    // Sidebar Menu Persistence
+    // Keep Master Data menu always open
+    const masterDataMenu = document.getElementById('masterDataMenu');
+    const masterDataToggle = document.querySelector('[data-bs-target="#masterDataMenu"]');
+
+    if (masterDataMenu && masterDataToggle) {
+        // Always show Master Data menu
+        masterDataMenu.classList.add('show');
+        masterDataToggle.setAttribute('aria-expanded', 'true');
+
+        // Store all collapse states
+        const collapseElements = document.querySelectorAll('.collapse');
+        collapseElements.forEach(collapse => {
+            collapse.addEventListener('shown.bs.collapse', function () {
+                localStorage.setItem('collapse_' + this.id, 'open');
+            });
+
+            collapse.addEventListener('hidden.bs.collapse', function () {
+                localStorage.setItem('collapse_' + this.id, 'closed');
+            });
+
+            // Restore state from localStorage
+            const savedState = localStorage.getItem('collapse_' + collapse.id);
+            if (savedState === 'open' && !collapse.classList.contains('show')) {
+                const bsCollapse = new bootstrap.Collapse(collapse, { toggle: false });
+                bsCollapse.show();
+            }
+        });
+    }
+
 });
