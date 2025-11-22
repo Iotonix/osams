@@ -6,8 +6,12 @@
     --bs-warning: #FFA800;
     --bs-body-bg: #F3F6F9;
     --bs-body-color: #212529;
-    /* Standard Bootstrap dark text for light mode */
+    /* Sidebar is ALWAYS dark regardless of theme */
     --sidebar-bg: #1E1E2D;
+    --sidebar-text: #ffffff;
+    --sidebar-text-muted: #a2a3b7;
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+    --sidebar-active-bg: #1b1b29;
     --sidebar-width: 250px;
 }
 
@@ -17,6 +21,7 @@
     --bs-body-color: #e1e1e1;
     --bs-card-bg: #1e1e2d;
     --bs-border-color: #2b2b40;
+    /* Sidebar remains the same dark color */
 }
 
 body {
@@ -43,7 +48,7 @@ body {
     padding: 0.875rem 1.25rem;
     font-size: 1.2rem;
     background-color: rgba(0, 0, 0, 0.1);
-    /* Slightly darker than sidebar for header */
+    color: var(--sidebar-text);
 }
 
 #sidebar-wrapper .list-group {
@@ -52,21 +57,20 @@ body {
 
 #sidebar-wrapper .list-group-item {
     background-color: transparent;
-    color: #a2a3b7;
-    /* Muted text for sidebar */
+    color: var(--sidebar-text-muted);
     border: none;
     font-weight: 500;
+    transition: all 0.15s ease;
 }
 
 #sidebar-wrapper .list-group-item:hover {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--sidebar-text);
+    background-color: var(--sidebar-hover-bg);
 }
 
 #sidebar-wrapper .list-group-item.active {
-    color: #ffffff;
-    background-color: #1b1b29;
-    /* Slightly darker active state */
+    color: var(--sidebar-text);
+    background-color: var(--sidebar-active-bg);
     border-left: 3px solid var(--bs-primary);
 }
 
@@ -114,7 +118,16 @@ body.sb-sidenav-toggled #sidebar-wrapper {
 .navbar-light {
     background-color: #ffffff !important;
     border-bottom: 1px solid #e4e6ef;
-    /* Light border for separation */
+}
+
+.navbar-light .navbar-brand,
+.navbar-light .nav-link,
+.navbar-light .btn-link {
+    color: #3f4254;
+}
+
+.navbar-light .btn-primary {
+    color: #ffffff;
 }
 
 [data-bs-theme="dark"] .navbar-light {
@@ -126,4 +139,60 @@ body.sb-sidenav-toggled #sidebar-wrapper {
 [data-bs-theme="dark"] .navbar-light .nav-link,
 [data-bs-theme="dark"] .navbar-light .btn-link {
     color: #e1e1e1;
+}
+
+/* Login Page Styles */
+.login-card {
+    background-color: var(--bs-body-bg);
+    border-radius: 16px;
+}
+
+[data-bs-theme="dark"] .login-card {
+    background-color: var(--bs-card-bg);
+}
+
+.login-logo {
+    max-width: 120px;
+    height: auto;
+}
+
+.login-card .form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e4e6ef;
+}
+
+[data-bs-theme="dark"] .login-card .form-control {
+    background-color: #1b1b29;
+    border-color: #2b2b40;
+    color: #e1e1e1;
+}
+
+.login-card .input-group-text {
+    background-color: transparent;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    border-color: #e4e6ef;
+}
+
+[data-bs-theme="dark"] .login-card .input-group-text {
+    background-color: #1b1b29;
+    border-color: #2b2b40;
+    color: #a2a3b7;
+}
+
+.login-card .form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(54, 153, 255, 0.15);
+}
+
+.login-card .input-group .form-control {
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+}
+
+.login-card .btn-primary {
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 500;
 }

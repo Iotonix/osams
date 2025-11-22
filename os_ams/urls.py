@@ -1,5 +1,5 @@
 """
-URL configuration for hugo project.
+URL configuration for os_ams project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -21,5 +21,7 @@ from core_app import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("login/", views.user_login, name="login"),
+    path("logout/", views.user_logout, name="logout"),
     path("", views.dashboard, name="dashboard"),
 ]

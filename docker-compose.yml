@@ -1,7 +1,7 @@
 services:
-  # hugo:
-  #   image: registry.ait.co.th/iotonix/hugo:0.1
-  #   container_name: hugo
+  # osams:
+  #   image: registry.ait.co.th/iotonix/osams:0.1
+  #   container_name: osams
   #   ports:
   #     - "8000:8000"
   #   restart: always
@@ -10,18 +10,20 @@ services:
   #   environment:
   #     - POSTGRES_HOST=timescaledb
   #     - POSTGRES_PORT=5432
-  #     - POSTGRES_DB=hugo
-  #     - POSTGRES_USER=ait
-  #     - POSTGRES_PASSWORD="ait1234"
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
   #     - OLLAMA_SERVER_URL=http://10.0.0.180:11434
   #     - LOGLEVEL=DEBUG
+  #   env_file:
+  #     - .env
   #   command: python manage.py runserver
   #   volumes:
-  #     - HugoVolume:/app
+  #     - OsamsVolume:/app
   #   profiles: ["dev"]
 
   timescaledb: # Version
-    image: timescale/timescaledb-ha:latest-pg17
+    image: timescale/timescaledb:latest-pg16
     container_name: timescaledb
     ports:
       - "5432:5432"
@@ -29,9 +31,11 @@ services:
     networks:
       - aitNet
     environment:
-      - POSTGRES_DB=osams
-      - POSTGRES_USER=pgadmin
-      - POSTGRES_PASSWORD="pgosams123"
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file:
+      - .env
     volumes:
       - TimescaleDBVolume:/var/lib/postgresql/data
 
@@ -39,5 +43,5 @@ networks:
   aitNet:
     external: true
 volumes:
-  HugoVolume:
+  OsamsVolume:
   TimescaleDBVolume:
