@@ -82,24 +82,20 @@ class DailyFlightForm(BootstrapFormMixin, forms.ModelForm):
         widgets = {
             # Use AJAX autocomplete for large dropdowns (fast loading)
             "airline": s2forms.ModelSelect2Widget(
-                model=DailyFlight._meta.get_field("airline").related_model,
                 search_fields=["iata_code__icontains", "name__icontains"],
-                attrs={"data-minimum-input-length": 0},
+                attrs={"data-minimum-input-length": 0, "data-placeholder": "Select airline..."},
             ),
             "origin": s2forms.ModelSelect2Widget(
-                model=DailyFlight._meta.get_field("origin").related_model,
                 search_fields=["iata_code__icontains", "name__icontains", "city__icontains"],
-                attrs={"data-minimum-input-length": 0},
+                attrs={"data-minimum-input-length": 0, "data-placeholder": "Select origin airport..."},
             ),
             "destination": s2forms.ModelSelect2Widget(
-                model=DailyFlight._meta.get_field("destination").related_model,
                 search_fields=["iata_code__icontains", "name__icontains", "city__icontains"],
-                attrs={"data-minimum-input-length": 0},
+                attrs={"data-minimum-input-length": 0, "data-placeholder": "Select destination airport..."},
             ),
             "aircraft_type": s2forms.ModelSelect2Widget(
-                model=DailyFlight._meta.get_field("aircraft_type").related_model,
                 search_fields=["iata_code__icontains", "manufacturer__icontains", "model__icontains"],
-                attrs={"data-minimum-input-length": 0},
+                attrs={"data-minimum-input-length": 0, "data-placeholder": "Select aircraft type..."},
             ),
             # Regular widgets for other fields
             "date_of_operation": forms.DateInput(attrs={"type": "date"}),
