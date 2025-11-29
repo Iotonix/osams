@@ -8,51 +8,100 @@
         <h2 class="h4 mb-1">Terminals</h2>
         <p class="text-muted">Airport terminal buildings</p>
     </div>
-    <a href="{% url 'admin:masterdata_terminal_add' %}" class="btn btn-primary">
+    <button type="button" 
+            class="btn btn-primary"
+            hx-get="{% url 'masterdata:add_terminal' %}"
+            hx-target="#formModal"
+            hx-swap="innerHTML"
+            data-bs-toggle="modal"
+            data-bs-target="#crudModal">
         <i class="bi bi-plus-circle me-2"></i>Add Terminal
-    </a>
+    </button>
 </div>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    {% for terminal in terminals %}
-    <div class="col">
-        <div class="card h-100 shadow-sm terminal-card position-relative">
-            <div class="card-body p-4">
-                <div class="card-actions">
-                    <a href="{% url 'admin:masterdata_terminal_change' terminal.pk %}" 
-                       class="btn btn-sm btn-light rounded-circle shadow-sm" title="Edit">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                </div>
-                
-                <h4 class="card-title fw-bold text-primary mb-4">
-                    <a href="{% url 'admin:masterdata_terminal_change' terminal.pk %}" class="text-decoration-none stretched-link">
-                        {{ terminal.code }}
-                    </a>
-                </h4>
-                
-                <div class="d-flex align-items-center text-muted">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-door-open fs-4 me-3"></i>
-                        <span class="fs-5 fw-medium">{{ terminal.gates.count }} Gates</span>
+<div id="table-container"
+     hx-get="{% url 'masterdata:terminal_list' %}"
+     hx-trigger="refreshTable from:body"
+     hx-select="#table-content"
+     hx-target="#table-content"
+     hx-swap="outerHTML">
+    <div id="table-content">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for terminal in terminals %}
+            <div class="col">
+                <div class="card h-100 shadow-sm terminal-card position-relative">
+                    <div class="card-body p-4">
+                        <div class="card-actions">
+                            <button type="button"
+                                    class="btn btn-sm btn-light rounded-circle shadow-sm me-1"
+                                    title="Edit"
+                                    hx-get="{% url 'masterdata:edit_terminal' terminal.pk %}"
+                                    hx-target="#formModal"
+                                    hx-swap="innerHTML"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#crudModal">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-light rounded-circle shadow-sm text-danger"
+                                    title="Delete"
+                                    hx-post="{% url 'masterdata:delete_terminal' terminal.pk %}"
+                                    hx-confirm="Are you sure you want to delete {{ terminal.name }}?"
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        
+                        <h4 class="card-title fw-bold text-primary mb-4">
+                            {{ terminal.code }}
+                        </h4>
+                        <p class="mb-2">{{ terminal.name }}</p>
+                        
+                        <div class="d-flex align-items-center text-muted">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-door-open fs-4 me-3"></i>
+                                <span class="fs-5 fw-medium">{{ terminal.gates.count }} Gates</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="card shadow-sm border-0">
-            <div class="card-body text-center py-5 text-muted">
-                <i class="bi bi-inbox display-4 d-block mb-3"></i>
-                No terminals configured
+            {% empty %}
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5 text-muted">
+                        <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                        No terminals configured
+                    </div>
+                </div>
             </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-3 text-muted">
+            <small>Total: {{ terminals.count }} terminals</small>
         </div>
     </div>
-    {% endfor %}
 </div>
 
-<div class="mt-3 text-muted">
-    <small>Total: {{ terminals.count }} terminals</small>
+<!-- CRUD Modal -->
+<div class="modal fade" id="crudModal" tabindex="-1" aria-labelledby="crudModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="formModal">
+            <!-- Form content will be loaded here via HTMX -->
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Close modal on successful form submission (when HX-Trigger fires)
+    document.body.addEventListener('refreshTable', function() {
+        var modal = bootstrap.Modal.getInstance(document.getElementById('crudModal'));
+        if (modal) {
+            modal.hide();
+        }
+    });
+</script>
 {% endblock %}

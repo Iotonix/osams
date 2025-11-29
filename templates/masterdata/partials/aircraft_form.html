@@ -1,0 +1,118 @@
+<form hx-post="{% if pk %}{% url action_url pk %}{% else %}{% url action_url %}{% endif %}"
+      hx-target="#formModal"
+      hx-swap="innerHTML">
+    {% csrf_token %}
+    
+    <div class="modal-header">
+        <h5 class="modal-title">{{ title }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    
+    <div class="modal-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            <p class="mb-0">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="{{ form.icao_code.id_for_label }}" class="form-label">ICAO Code *</label>
+                {{ form.icao_code }}
+                {% if form.icao_code.errors %}
+                <div class="invalid-feedback d-block">{{ form.icao_code.errors.0 }}</div>
+                {% endif %}
+                <small class="text-muted">{{ form.icao_code.help_text }}</small>
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.iata_code.id_for_label }}" class="form-label">IATA Code</label>
+                {{ form.iata_code }}
+                {% if form.iata_code.errors %}
+                <div class="invalid-feedback d-block">{{ form.iata_code.errors.0 }}</div>
+                {% endif %}
+                <small class="text-muted">{{ form.iata_code.help_text }}</small>
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.manufacturer.id_for_label }}" class="form-label">Manufacturer *</label>
+                {{ form.manufacturer }}
+                {% if form.manufacturer.errors %}
+                <div class="invalid-feedback d-block">{{ form.manufacturer.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.model.id_for_label }}" class="form-label">Model *</label>
+                {{ form.model }}
+                {% if form.model.errors %}
+                <div class="invalid-feedback d-block">{{ form.model.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.wake_turbulence.id_for_label }}" class="form-label">Wake Turbulence *</label>
+                {{ form.wake_turbulence }}
+                {% if form.wake_turbulence.errors %}
+                <div class="invalid-feedback d-block">{{ form.wake_turbulence.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.size_category.id_for_label }}" class="form-label">Size Category *</label>
+                {{ form.size_category }}
+                {% if form.size_category.errors %}
+                <div class="invalid-feedback d-block">{{ form.size_category.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.wingspan_meters.id_for_label }}" class="form-label">Wingspan (m) *</label>
+                {{ form.wingspan_meters }}
+                {% if form.wingspan_meters.errors %}
+                <div class="invalid-feedback d-block">{{ form.wingspan_meters.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.length_meters.id_for_label }}" class="form-label">Length (m) *</label>
+                {{ form.length_meters }}
+                {% if form.length_meters.errors %}
+                <div class="invalid-feedback d-block">{{ form.length_meters.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.max_takeoff_weight_kg.id_for_label }}" class="form-label">MTOW (kg) *</label>
+                {{ form.max_takeoff_weight_kg }}
+                {% if form.max_takeoff_weight_kg.errors %}
+                <div class="invalid-feedback d-block">{{ form.max_takeoff_weight_kg.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6">
+                <label for="{{ form.typical_capacity.id_for_label }}" class="form-label">Typical Capacity *</label>
+                {{ form.typical_capacity }}
+                {% if form.typical_capacity.errors %}
+                <div class="invalid-feedback d-block">{{ form.typical_capacity.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-12">
+                <div class="form-check">
+                    {{ form.is_active }}
+                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>Save
+        </button>
+    </div>
+</form>

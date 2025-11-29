@@ -8,67 +8,117 @@
         <h2 class="h4 mb-1">Aircraft Types</h2>
         <p class="text-muted">Registered aircraft specifications</p>
     </div>
-    <a href="{% url 'admin:masterdata_aircrafttype_add' %}" class="btn btn-primary">
+    <button type="button" 
+            class="btn btn-primary"
+            hx-get="{% url 'masterdata:add_aircraft' %}"
+            hx-target="#formModal"
+            hx-swap="innerHTML"
+            data-bs-toggle="modal"
+            data-bs-target="#crudModal">
         <i class="bi bi-plus-circle me-2"></i>Add Aircraft Type
-    </a>
+    </button>
 </div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>ICAO</th>
-                        <th>IATA</th>
-                        <th>Manufacturer & Model</th>
-                        <th>Category</th>
-                        <th>Wake</th>
-                        <th class="text-end">Capacity</th>
-                        <th class="text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ac in aircraft %}
-                    <tr>
-                        <td><span class="badge bg-primary">{{ ac.icao_code }}</span></td>
-                        <td>
-                            {% if ac.iata_code %}
-                            <span class="badge bg-info">{{ ac.iata_code }}</span>
-                            {% else %}
-                            <small class="text-muted">—</small>
-                            {% endif %}
-                        </td>
-                        <td class="fw-bold">{{ ac.manufacturer }} {{ ac.model }}</td>
-                        <td>
-                            <span class="badge bg-secondary">{{ ac.get_size_category_display }}</span>
-                        </td>
-                        <td>
-                            <span class="badge bg-warning text-dark">{{ ac.get_wake_turbulence_display }}</span>
-                        </td>
-                        <td class="text-end">{{ ac.typical_capacity }} pax</td>
-                        <td class="text-center">
-                            <a href="{% url 'admin:masterdata_aircrafttype_change' ac.pk %}" 
-                               class="btn btn-sm btn-light" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox display-4 d-block mb-3"></i>
-                            No aircraft types found
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div id="table-container"
+     hx-get="{% url 'masterdata:aircraft_list' %}"
+     hx-trigger="refreshTable from:body"
+     hx-select="#table-content"
+     hx-target="#table-content"
+     hx-swap="outerHTML">
+    <div id="table-content">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ICAO</th>
+                                <th>IATA</th>
+                                <th>Manufacturer & Model</th>
+                                <th>Category</th>
+                                <th>Wake</th>
+                                <th class="text-end">Capacity</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ac in aircraft %}
+                            <tr>
+                                <td><span class="badge bg-primary">{{ ac.icao_code }}</span></td>
+                                <td>
+                                    {% if ac.iata_code %}
+                                    <span class="badge bg-info">{{ ac.iata_code }}</span>
+                                    {% else %}
+                                    <small class="text-muted">—</small>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold">{{ ac.manufacturer }} {{ ac.model }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ ac.get_size_category_display }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">{{ ac.get_wake_turbulence_display }}</span>
+                                </td>
+                                <td class="text-end">{{ ac.typical_capacity }} pax</td>
+                                <td class="text-center">
+                                    <button type="button"
+                                            class="btn btn-sm btn-light"
+                                            title="Edit"
+                                            hx-get="{% url 'masterdata:edit_aircraft' ac.pk %}"
+                                            hx-target="#formModal"
+                                            hx-swap="innerHTML"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#crudModal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-light text-danger"
+                                            title="Delete"
+                                            hx-post="{% url 'masterdata:delete_aircraft' ac.pk %}"
+                                            hx-confirm="Are you sure you want to delete {{ ac.manufacturer }} {{ ac.model }}?"
+                                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                    No aircraft types found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3 text-muted">
+            <small>Total: {{ aircraft.count }} active aircraft types</small>
         </div>
     </div>
 </div>
 
-<div class="mt-3 text-muted">
-    <small>Total: {{ aircraft.count }} active aircraft types</small>
+<!-- CRUD Modal -->
+<div class="modal fade" id="crudModal" tabindex="-1" aria-labelledby="crudModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="formModal">
+            <!-- Form content will be loaded here via HTMX -->
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Close modal on successful form submission (when HX-Trigger fires)
+    document.body.addEventListener('refreshTable', function() {
+        var modal = bootstrap.Modal.getInstance(document.getElementById('crudModal'));
+        if (modal) {
+            modal.hide();
+        }
+    });
+</script>
 {% endblock %}
