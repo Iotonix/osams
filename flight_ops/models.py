@@ -24,6 +24,11 @@ class DailyFlight(models.Model):
         "schedules.SeasonalFlight", on_delete=models.SET_NULL, null=True, blank=True, help_text="Source seasonal flight (if applicable)"
     )
 
+    # Rolling Window Strategy fields
+    is_manually_modified = models.BooleanField(default=False, help_text="True if this flight has been manually edited (prevents auto-propagation)")
+    schedule_version = models.IntegerField(default=1, help_text="Version of the seasonal schedule used to generate this flight")
+    last_propagated_at = models.DateTimeField(null=True, blank=True, help_text="Last time this flight was updated from seasonal schedule")
+
     # Basic Flight Info
     airline = models.ForeignKey("masterdata.Airline", on_delete=models.CASCADE)
     flight_number = models.CharField(max_length=10, help_text="Flight number (e.g., 920)")

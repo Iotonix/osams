@@ -85,7 +85,12 @@ def edit_daily_flight(request, pk):
     if request.method == "POST":
         form = DailyFlightForm(request.POST, instance=daily_flight)
         if form.is_valid():
-            form.save()
+            # Mark as manually modified when edited through UI
+            daily_flight = form.save(commit=False)
+            daily_flight.is_manually_modified = True
+            daily_flight.save()
+            form.save_m2m()  # Save many-to-many relationships
+
             messages.success(
                 request,
                 f"Daily Flight '{daily_flight.airline.iata_code}{daily_flight.flight_number}' updated successfully.",
