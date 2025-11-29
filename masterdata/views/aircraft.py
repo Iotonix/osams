@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 
 from ..models import AircraftType
@@ -21,17 +21,16 @@ def add_aircraft(request):
     if request.method == "POST":
         form = AircraftTypeForm(request.POST)
         if form.is_valid():
-            form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            aircraft = form.save()
+            messages.success(request, f"Aircraft Type '{aircraft.icao_code}' created successfully.")
+            return redirect("masterdata:aircraft_list")
     else:
         form = AircraftTypeForm()
 
     return render(
         request,
-        "masterdata/partials/aircraft_form.html",
-        {"form": form, "title": "Add Aircraft Type", "action_url": "masterdata:add_aircraft"},
+        "masterdata/aircraft_form.html",
+        {"form": form, "title": "Add Aircraft Type", "action": "Add"},
     )
 
 
@@ -45,20 +44,19 @@ def edit_aircraft(request, pk):
         form = AircraftTypeForm(request.POST, instance=aircraft)
         if form.is_valid():
             form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            messages.success(request, f"Aircraft Type '{aircraft.icao_code}' updated successfully.")
+            return redirect("masterdata:aircraft_list")
     else:
         form = AircraftTypeForm(instance=aircraft)
 
     return render(
         request,
-        "masterdata/partials/aircraft_form.html",
+        "masterdata/aircraft_form.html",
         {
             "form": form,
             "title": "Edit Aircraft Type",
-            "action_url": "masterdata:edit_aircraft",
-            "pk": pk,
+            "action": "Update",
+            "aircraft": aircraft,
         },
     )
 
@@ -68,9 +66,9 @@ def edit_aircraft(request, pk):
 def delete_aircraft(request, pk):
     """Soft delete an aircraft type by setting is_active=False"""
     aircraft = get_object_or_404(AircraftType, pk=pk)
+    aircraft_code = aircraft.icao_code
     aircraft.is_active = False
     aircraft.save()
 
-    response = HttpResponse(status=204)
-    response["HX-Trigger"] = "refreshTable"
-    return response
+    messages.success(request, f"Aircraft Type '{aircraft_code}' deleted successfully.")
+    return redirect("masterdata:aircraft_list")

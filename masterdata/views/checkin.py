@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 
 from ..models import CheckInCounter
@@ -21,17 +21,16 @@ def add_checkin(request):
     if request.method == "POST":
         form = CheckInCounterForm(request.POST)
         if form.is_valid():
-            form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            counter = form.save()
+            messages.success(request, f"Check-in Counter '{counter.code}' created successfully.")
+            return redirect("masterdata:checkin_list")
     else:
         form = CheckInCounterForm()
 
     return render(
         request,
-        "masterdata/partials/checkin_form.html",
-        {"form": form, "title": "Add Check-in Counter", "action_url": "masterdata:add_checkin"},
+        "masterdata/checkin_form.html",
+        {"form": form, "title": "Add Check-in Counter", "action": "Add"},
     )
 
 
@@ -45,20 +44,19 @@ def edit_checkin(request, pk):
         form = CheckInCounterForm(request.POST, instance=counter)
         if form.is_valid():
             form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            messages.success(request, f"Check-in Counter '{counter.code}' updated successfully.")
+            return redirect("masterdata:checkin_list")
     else:
         form = CheckInCounterForm(instance=counter)
 
     return render(
         request,
-        "masterdata/partials/checkin_form.html",
+        "masterdata/checkin_form.html",
         {
             "form": form,
             "title": "Edit Check-in Counter",
-            "action_url": "masterdata:edit_checkin",
-            "pk": pk,
+            "action": "Update",
+            "counter": counter,
         },
     )
 
@@ -68,9 +66,9 @@ def edit_checkin(request, pk):
 def delete_checkin(request, pk):
     """Soft delete a check-in counter by setting is_active=False"""
     counter = get_object_or_404(CheckInCounter, pk=pk)
+    counter_code = counter.code
     counter.is_active = False
     counter.save()
 
-    response = HttpResponse(status=204)
-    response["HX-Trigger"] = "refreshTable"
-    return response
+    messages.success(request, f"Check-in Counter '{counter_code}' deleted successfully.")
+    return redirect("masterdata:checkin_list")

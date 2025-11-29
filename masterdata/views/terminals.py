@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 
 from ..models import Terminal
@@ -22,16 +22,15 @@ def add_terminal(request):
         form = TerminalForm(request.POST)
         if form.is_valid():
             form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            messages.success(request, f"Terminal '{form.cleaned_data['code']}' created successfully.")
+            return redirect("masterdata:terminal_list")
     else:
         form = TerminalForm()
 
     return render(
         request,
-        "masterdata/partials/terminal_form.html",
-        {"form": form, "title": "Add Terminal", "action_url": "masterdata:add_terminal"},
+        "masterdata/terminal_form.html",
+        {"form": form, "title": "Add Terminal", "action": "Add"},
     )
 
 
@@ -45,20 +44,19 @@ def edit_terminal(request, pk):
         form = TerminalForm(request.POST, instance=terminal)
         if form.is_valid():
             form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            messages.success(request, f"Terminal '{terminal.code}' updated successfully.")
+            return redirect("masterdata:terminal_list")
     else:
         form = TerminalForm(instance=terminal)
 
     return render(
         request,
-        "masterdata/partials/terminal_form.html",
+        "masterdata/terminal_form.html",
         {
             "form": form,
             "title": "Edit Terminal",
-            "action_url": "masterdata:edit_terminal",
-            "pk": pk,
+            "action": "Update",
+            "terminal": terminal,
         },
     )
 
@@ -68,9 +66,9 @@ def edit_terminal(request, pk):
 def delete_terminal(request, pk):
     """Soft delete a terminal by setting is_active=False"""
     terminal = get_object_or_404(Terminal, pk=pk)
+    terminal_code = terminal.code
     terminal.is_active = False
     terminal.save()
 
-    response = HttpResponse(status=204)
-    response["HX-Trigger"] = "refreshTable"
-    return response
+    messages.success(request, f"Terminal '{terminal_code}' deleted successfully.")
+    return redirect("masterdata:terminal_list")

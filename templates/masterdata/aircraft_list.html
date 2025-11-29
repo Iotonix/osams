@@ -8,24 +8,12 @@
         <h2 class="h4 mb-1">Aircraft Types</h2>
         <p class="text-muted">Registered aircraft specifications</p>
     </div>
-    <button type="button" 
-            class="btn btn-primary"
-            hx-get="{% url 'masterdata:add_aircraft' %}"
-            hx-target="#formModal"
-            hx-swap="innerHTML"
-            data-bs-toggle="modal"
-            data-bs-target="#crudModal">
+    <a href="{% url 'masterdata:add_aircraft' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle me-2"></i>Add Aircraft Type
-    </button>
+    </a>
 </div>
 
-<div id="table-container"
-     hx-get="{% url 'masterdata:aircraft_list' %}"
-     hx-trigger="refreshTable from:body"
-     hx-select="#table-content"
-     hx-target="#table-content"
-     hx-swap="outerHTML">
-    <div id="table-content">
+<div>
         <div class="card shadow-sm border-0">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -61,24 +49,19 @@
                                 </td>
                                 <td class="text-end">{{ ac.typical_capacity }} pax</td>
                                 <td class="text-center">
-                                    <button type="button"
-                                            class="btn btn-sm btn-light"
-                                            title="Edit"
-                                            hx-get="{% url 'masterdata:edit_aircraft' ac.pk %}"
-                                            hx-target="#formModal"
-                                            hx-swap="innerHTML"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#crudModal">
+                                    <a href="{% url 'masterdata:edit_aircraft' ac.pk %}"
+                                       class="btn btn-sm btn-light"
+                                       title="Edit">
                                         <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button type="button"
-                                            class="btn btn-sm btn-light text-danger"
-                                            title="Delete"
-                                            hx-post="{% url 'masterdata:delete_aircraft' ac.pk %}"
-                                            hx-confirm="Are you sure you want to delete {{ ac.manufacturer }} {{ ac.model }}?"
-                                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                    </a>
+                                    <form method="post" action="{% url 'masterdata:delete_aircraft' ac.pk %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ ac.manufacturer }} {{ ac.model }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                class="btn btn-sm btn-light text-danger"
+                                                title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             {% empty %}
@@ -98,27 +81,5 @@
         <div class="mt-3 text-muted">
             <small>Total: {{ aircraft.count }} active aircraft types</small>
         </div>
-    </div>
 </div>
-
-<!-- CRUD Modal -->
-<div class="modal fade" id="crudModal" tabindex="-1" aria-labelledby="crudModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" id="formModal">
-            <!-- Form content will be loaded here via HTMX -->
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Close modal on successful form submission (when HX-Trigger fires)
-    document.body.addEventListener('refreshTable', function() {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('crudModal'));
-        if (modal) {
-            modal.hide();
-        }
-    });
-</script>
 {% endblock %}

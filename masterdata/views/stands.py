@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 
 from ..models import Stand
@@ -21,17 +21,16 @@ def add_stand(request):
     if request.method == "POST":
         form = StandForm(request.POST)
         if form.is_valid():
-            form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            stand = form.save()
+            messages.success(request, f"Stand '{stand.code}' created successfully.")
+            return redirect("masterdata:stand_list")
     else:
         form = StandForm()
 
     return render(
         request,
-        "masterdata/partials/stand_form.html",
-        {"form": form, "title": "Add Stand", "action_url": "masterdata:add_stand"},
+        "masterdata/stand_form.html",
+        {"form": form, "title": "Add Stand", "action": "Add"},
     )
 
 
@@ -45,20 +44,19 @@ def edit_stand(request, pk):
         form = StandForm(request.POST, instance=stand)
         if form.is_valid():
             form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            messages.success(request, f"Stand '{stand.code}' updated successfully.")
+            return redirect("masterdata:stand_list")
     else:
         form = StandForm(instance=stand)
 
     return render(
         request,
-        "masterdata/partials/stand_form.html",
+        "masterdata/stand_form.html",
         {
             "form": form,
             "title": "Edit Stand",
-            "action_url": "masterdata:edit_stand",
-            "pk": pk,
+            "action": "Update",
+            "stand": stand,
         },
     )
 
@@ -68,9 +66,9 @@ def edit_stand(request, pk):
 def delete_stand(request, pk):
     """Soft delete a stand by setting is_active=False"""
     stand = get_object_or_404(Stand, pk=pk)
+    stand_code = stand.code
     stand.is_active = False
     stand.save()
 
-    response = HttpResponse(status=204)
-    response["HX-Trigger"] = "refreshTable"
-    return response
+    messages.success(request, f"Stand '{stand_code}' deleted successfully.")
+    return redirect("masterdata:stand_list")

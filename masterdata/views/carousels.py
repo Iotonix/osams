@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 
 from ..models import BaggageCarousel
@@ -21,17 +21,16 @@ def add_carousel(request):
     if request.method == "POST":
         form = BaggageCarouselForm(request.POST)
         if form.is_valid():
-            form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            carousel = form.save()
+            messages.success(request, f"Baggage Carousel '{carousel.code}' created successfully.")
+            return redirect("masterdata:carousel_list")
     else:
         form = BaggageCarouselForm()
 
     return render(
         request,
-        "masterdata/partials/carousel_form.html",
-        {"form": form, "title": "Add Baggage Carousel", "action_url": "masterdata:add_carousel"},
+        "masterdata/carousel_form.html",
+        {"form": form, "title": "Add Baggage Carousel", "action": "Add"},
     )
 
 
@@ -45,20 +44,19 @@ def edit_carousel(request, pk):
         form = BaggageCarouselForm(request.POST, instance=carousel)
         if form.is_valid():
             form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            messages.success(request, f"Baggage Carousel '{carousel.code}' updated successfully.")
+            return redirect("masterdata:carousel_list")
     else:
         form = BaggageCarouselForm(instance=carousel)
 
     return render(
         request,
-        "masterdata/partials/carousel_form.html",
+        "masterdata/carousel_form.html",
         {
             "form": form,
             "title": "Edit Baggage Carousel",
-            "action_url": "masterdata:edit_carousel",
-            "pk": pk,
+            "action": "Update",
+            "carousel": carousel,
         },
     )
 
@@ -68,9 +66,9 @@ def edit_carousel(request, pk):
 def delete_carousel(request, pk):
     """Soft delete a baggage carousel by setting is_active=False"""
     carousel = get_object_or_404(BaggageCarousel, pk=pk)
+    carousel_code = carousel.code
     carousel.is_active = False
     carousel.save()
 
-    response = HttpResponse(status=204)
-    response["HX-Trigger"] = "refreshTable"
-    return response
+    messages.success(request, f"Baggage Carousel '{carousel_code}' deleted successfully.")
+    return redirect("masterdata:carousel_list")

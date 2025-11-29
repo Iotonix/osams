@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 
 from ..models import Gate
@@ -21,17 +21,16 @@ def add_gate(request):
     if request.method == "POST":
         form = GateForm(request.POST)
         if form.is_valid():
-            form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            gate = form.save()
+            messages.success(request, f"Gate '{gate.code}' created successfully.")
+            return redirect("masterdata:gate_list")
     else:
         form = GateForm()
 
     return render(
         request,
-        "masterdata/partials/gate_form.html",
-        {"form": form, "title": "Add Gate", "action_url": "masterdata:add_gate"},
+        "masterdata/gate_form.html",
+        {"form": form, "title": "Add Gate", "action": "Add"},
     )
 
 
@@ -45,20 +44,19 @@ def edit_gate(request, pk):
         form = GateForm(request.POST, instance=gate)
         if form.is_valid():
             form.save()
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = "refreshTable"
-            return response
+            messages.success(request, f"Gate '{gate.code}' updated successfully.")
+            return redirect("masterdata:gate_list")
     else:
         form = GateForm(instance=gate)
 
     return render(
         request,
-        "masterdata/partials/gate_form.html",
+        "masterdata/gate_form.html",
         {
             "form": form,
             "title": "Edit Gate",
-            "action_url": "masterdata:edit_gate",
-            "pk": pk,
+            "action": "Update",
+            "gate": gate,
         },
     )
 
@@ -68,9 +66,9 @@ def edit_gate(request, pk):
 def delete_gate(request, pk):
     """Soft delete a gate by setting is_active=False"""
     gate = get_object_or_404(Gate, pk=pk)
+    gate_code = gate.code
     gate.is_active = False
     gate.save()
 
-    response = HttpResponse(status=204)
-    response["HX-Trigger"] = "refreshTable"
-    return response
+    messages.success(request, f"Gate '{gate_code}' deleted successfully.")
+    return redirect("masterdata:gate_list")

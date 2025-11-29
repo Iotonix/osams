@@ -8,48 +8,31 @@
         <h2 class="h4 mb-1">Terminals</h2>
         <p class="text-muted">Airport terminal buildings</p>
     </div>
-    <button type="button" 
-            class="btn btn-primary"
-            hx-get="{% url 'masterdata:add_terminal' %}"
-            hx-target="#formModal"
-            hx-swap="innerHTML"
-            data-bs-toggle="modal"
-            data-bs-target="#crudModal">
+    <a href="{% url 'masterdata:add_terminal' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle me-2"></i>Add Terminal
-    </button>
+    </a>
 </div>
 
-<div id="table-container"
-     hx-get="{% url 'masterdata:terminal_list' %}"
-     hx-trigger="refreshTable from:body"
-     hx-select="#table-content"
-     hx-target="#table-content"
-     hx-swap="outerHTML">
-    <div id="table-content">
+<div>
         <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for terminal in terminals %}
             <div class="col">
                 <div class="card h-100 shadow-sm terminal-card position-relative">
                     <div class="card-body p-4">
                         <div class="card-actions">
-                            <button type="button"
-                                    class="btn btn-sm btn-light rounded-circle shadow-sm me-1"
-                                    title="Edit"
-                                    hx-get="{% url 'masterdata:edit_terminal' terminal.pk %}"
-                                    hx-target="#formModal"
-                                    hx-swap="innerHTML"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#crudModal">
+                            <a href="{% url 'masterdata:edit_terminal' terminal.pk %}"
+                               class="btn btn-sm btn-light rounded-circle shadow-sm me-1"
+                               title="Edit">
                                 <i class="bi bi-pencil"></i>
-                            </button>
-                            <button type="button"
-                                    class="btn btn-sm btn-light rounded-circle shadow-sm text-danger"
-                                    title="Delete"
-                                    hx-post="{% url 'masterdata:delete_terminal' terminal.pk %}"
-                                    hx-confirm="Are you sure you want to delete {{ terminal.name }}?"
-                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            </a>
+                            <form method="post" action="{% url 'masterdata:delete_terminal' terminal.pk %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ terminal.name }}?');">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-sm btn-light rounded-circle shadow-sm text-danger"
+                                        title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
                         </div>
                         
                         <h4 class="card-title fw-bold text-primary mb-4">
@@ -83,25 +66,4 @@
         </div>
     </div>
 </div>
-
-<!-- CRUD Modal -->
-<div class="modal fade" id="crudModal" tabindex="-1" aria-labelledby="crudModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" id="formModal">
-            <!-- Form content will be loaded here via HTMX -->
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Close modal on successful form submission (when HX-Trigger fires)
-    document.body.addEventListener('refreshTable', function() {
-        var modal = bootstrap.Modal.getInstance(document.getElementById('crudModal'));
-        if (modal) {
-            modal.hide();
-        }
-    });
-</script>
 {% endblock %}
