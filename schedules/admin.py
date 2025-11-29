@@ -21,4 +21,3 @@ class SeasonalFlightAdmin(admin.ModelAdmin):
     list_filter = ["airline", "origin", "destination", "is_active", "start_date"]
     search_fields = ["flight_number", "airline__iata_code", "airline__name", "origin__iata_code", "destination__iata_code"]
     ordering = ["airline", "flight_number", "start_date"]
-

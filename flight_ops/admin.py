@@ -29,22 +29,27 @@ class DailyFlightAdmin(admin.ModelAdmin):
     ]
     ordering = ["-date_of_operation", "stod", "airline", "flight_number"]
     date_hierarchy = "date_of_operation"
-    
-    fieldsets = (
-        ("Basic Information", {
-            "fields": ("schedule", "airline", "flight_number", "origin", "destination", "aircraft_type", "date_of_operation", "flight_id", "registration", "status")
-        }),
-        ("Departure Times", {
-            "fields": ("stod", "etod", "aobt", "atod")
-        }),
-        ("Arrival Times", {
-            "fields": ("stoa", "etoa", "atoa", "aibt")
-        }),
-        ("Resource Allocation", {
-            "fields": ("gate", "stand", "checkin_counters", "carousel")
-        }),
-        ("Additional Information", {
-            "fields": ("public_remark", "qr_code_data")
-        }),
-    )
 
+    fieldsets = (
+        (
+            "Basic Information",
+            {
+                "fields": (
+                    "schedule",
+                    "airline",
+                    "flight_number",
+                    "origin",
+                    "destination",
+                    "aircraft_type",
+                    "date_of_operation",
+                    "flight_id",
+                    "registration",
+                    "status",
+                )
+            },
+        ),
+        ("Departure Times", {"fields": ("stod", "etod", "aobt", "atod")}),
+        ("Arrival Times", {"fields": ("stoa", "etoa", "atoa", "aibt")}),
+        ("Resource Allocation", {"fields": ("gate", "stand", "checkin_counters", "carousel")}),
+        ("Additional Information", {"fields": ("public_remark", "qr_code_data")}),
+    )

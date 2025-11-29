@@ -13,9 +13,7 @@ def seasonal_flight_list(request):
     """Display list of all active seasonal flights with search"""
     search_query = request.GET.get("search", "")
 
-    seasonal_flights = SeasonalFlight.objects.filter(is_active=True).select_related(
-        "airline", "origin", "destination", "aircraft_type"
-    )
+    seasonal_flights = SeasonalFlight.objects.filter(is_active=True).select_related("airline", "origin", "destination", "aircraft_type")
 
     # Apply search filter if provided
     if search_query:
