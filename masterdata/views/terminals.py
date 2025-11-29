@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from ..models import Terminal
 from ..forms import TerminalForm
@@ -9,9 +10,18 @@ from ..forms import TerminalForm
 
 @login_required
 def terminal_list(request):
-    """Display list of all active terminals"""
-    terminals = Terminal.objects.filter(is_active=True).order_by("code")
-    return render(request, "masterdata/terminal_list.html", {"terminals": terminals})
+    """Display list of all active terminals with search"""
+    search_query = request.GET.get("search", "")
+
+    terminals = Terminal.objects.filter(is_active=True)
+
+    # Apply search filter if provided
+    if search_query:
+        terminals = terminals.filter(Q(code__icontains=search_query) | Q(name__icontains=search_query))
+
+    terminals = terminals.order_by("code")
+
+    return render(request, "masterdata/terminal_list.html", {"terminals": terminals, "search_query": search_query})
 
 
 @login_required

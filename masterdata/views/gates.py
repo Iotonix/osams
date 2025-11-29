@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from ..models import Gate
 from ..forms import GateForm
@@ -9,9 +10,18 @@ from ..forms import GateForm
 
 @login_required
 def gate_list(request):
-    """Display list of all active gates"""
-    gates = Gate.objects.filter(is_active=True).select_related("terminal").order_by("code")
-    return render(request, "masterdata/gate_list.html", {"gates": gates})
+    """Display list of all active gates with search"""
+    search_query = request.GET.get("search", "")
+
+    gates = Gate.objects.filter(is_active=True).select_related("terminal")
+
+    # Apply search filter if provided
+    if search_query:
+        gates = gates.filter(Q(code__icontains=search_query) | Q(terminal__code__icontains=search_query))
+
+    gates = gates.order_by("code")
+
+    return render(request, "masterdata/gate_list.html", {"gates": gates, "search_query": search_query})
 
 
 @login_required

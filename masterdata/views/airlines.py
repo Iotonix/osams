@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from ..models import Airline
 from ..forms import AirlineForm
@@ -9,9 +10,23 @@ from ..forms import AirlineForm
 
 @login_required
 def airline_list(request):
-    """Display list of all active airlines"""
-    airlines = Airline.objects.filter(is_active=True).order_by("iata_code")
-    return render(request, "masterdata/airline_list.html", {"airlines": airlines})
+    """Display list of all active airlines with search"""
+    search_query = request.GET.get("search", "")
+
+    airlines = Airline.objects.filter(is_active=True)
+
+    # Apply search filter if provided
+    if search_query:
+        airlines = airlines.filter(
+            Q(iata_code__icontains=search_query)
+            | Q(icao_code__icontains=search_query)
+            | Q(name__icontains=search_query)
+            | Q(country__icontains=search_query)
+        )
+
+    airlines = airlines.order_by("iata_code")
+
+    return render(request, "masterdata/airline_list.html", {"airlines": airlines, "search_query": search_query})
 
 
 @login_required

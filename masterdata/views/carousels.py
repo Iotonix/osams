@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from ..models import BaggageCarousel
 from ..forms import BaggageCarouselForm
@@ -9,9 +10,18 @@ from ..forms import BaggageCarouselForm
 
 @login_required
 def carousel_list(request):
-    """Display list of all active baggage carousels"""
-    carousels = BaggageCarousel.objects.filter(is_active=True).select_related("terminal").order_by("code")
-    return render(request, "masterdata/carousel_list.html", {"carousels": carousels})
+    """Display list of all active baggage carousels with search"""
+    search_query = request.GET.get("search", "")
+
+    carousels = BaggageCarousel.objects.filter(is_active=True).select_related("terminal")
+
+    # Apply search filter if provided
+    if search_query:
+        carousels = carousels.filter(Q(code__icontains=search_query) | Q(terminal__code__icontains=search_query))
+
+    carousels = carousels.order_by("code")
+
+    return render(request, "masterdata/carousel_list.html", {"carousels": carousels, "search_query": search_query})
 
 
 @login_required

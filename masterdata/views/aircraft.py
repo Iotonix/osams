@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from ..models import AircraftType
 from ..forms import AircraftTypeForm
@@ -9,9 +10,23 @@ from ..forms import AircraftTypeForm
 
 @login_required
 def aircraft_list(request):
-    """Display list of all active aircraft types"""
-    aircraft = AircraftType.objects.filter(is_active=True).order_by("icao_code")
-    return render(request, "masterdata/aircraft_list.html", {"aircraft": aircraft})
+    """Display list of all active aircraft types with search"""
+    search_query = request.GET.get("search", "")
+
+    aircraft = AircraftType.objects.filter(is_active=True)
+
+    # Apply search filter if provided
+    if search_query:
+        aircraft = aircraft.filter(
+            Q(icao_code__icontains=search_query)
+            | Q(iata_code__icontains=search_query)
+            | Q(manufacturer__icontains=search_query)
+            | Q(model__icontains=search_query)
+        )
+
+    aircraft = aircraft.order_by("icao_code")
+
+    return render(request, "masterdata/aircraft_list.html", {"aircraft": aircraft, "search_query": search_query})
 
 
 @login_required

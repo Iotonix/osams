@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from ..models import CheckInCounter
 from ..forms import CheckInCounterForm
@@ -9,9 +10,18 @@ from ..forms import CheckInCounterForm
 
 @login_required
 def checkin_list(request):
-    """Display list of all active check-in counters"""
-    counters = CheckInCounter.objects.filter(is_active=True).select_related("terminal").order_by("code")
-    return render(request, "masterdata/checkin_list.html", {"counters": counters})
+    """Display list of all active check-in counters with search"""
+    search_query = request.GET.get("search", "")
+
+    counters = CheckInCounter.objects.filter(is_active=True).select_related("terminal")
+
+    # Apply search filter if provided
+    if search_query:
+        counters = counters.filter(Q(code__icontains=search_query) | Q(terminal__code__icontains=search_query) | Q(counter_group__icontains=search_query))
+
+    counters = counters.order_by("code")
+
+    return render(request, "masterdata/checkin_list.html", {"counters": counters, "search_query": search_query})
 
 
 @login_required

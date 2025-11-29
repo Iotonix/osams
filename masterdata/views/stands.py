@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from ..models import Stand
 from ..forms import StandForm
@@ -9,9 +10,18 @@ from ..forms import StandForm
 
 @login_required
 def stand_list(request):
-    """Display list of all active stands"""
-    stands = Stand.objects.filter(is_active=True).order_by("code")
-    return render(request, "masterdata/stand_list.html", {"stands": stands})
+    """Display list of all active stands with search"""
+    search_query = request.GET.get("search", "")
+
+    stands = Stand.objects.filter(is_active=True)
+
+    # Apply search filter if provided
+    if search_query:
+        stands = stands.filter(Q(code__icontains=search_query))
+
+    stands = stands.order_by("code")
+
+    return render(request, "masterdata/stand_list.html", {"stands": stands, "search_query": search_query})
 
 
 @login_required
