@@ -195,14 +195,53 @@ OS-AMS features a modern dual-theme interface:
 - **Sidebar:** Always dark for consistent navigation
 - **Theme Toggle:** Top-right corner (persistent via localStorage)
 
-## 📦 Core Modules (Planned)
+## 🎨 UI Design Philosophy
 
-1. **masterdata** - Physical assets (Gates, Terminals) and airline profiles
-2. **schedules** - Seasonal and daily flight plans (SSIM import)
-3. **allocation** - Constraint-based gate and check-in assignment engine
-4. **fids** - Real-time Flight Information Display System
-5. **billing** - Aeronautical fee calculation
-6. **bi_stats** - Analytics dashboards using TimescaleDB hyper-functions
+OS-AMS uses a **full-page form approach** (no modals) for better user experience:
+
+- **List Views:** Clean table layouts with search functionality and inline actions
+- **Add/Edit Forms:** Full-page forms with Bootstrap styling for clarity and accessibility
+- **Consistent UX:** All master data follows the same pattern: List → Add/Edit → Back to List
+- **Responsive Design:** Forms and tables adapt seamlessly to different screen sizes
+
+## 📦 Core Modules
+
+### ✅ Master Data (Implemented)
+
+The **masterdata** module provides comprehensive management of airport reference data:
+
+#### Aviation Data
+
+- **Airlines** - Carrier profiles with IATA/ICAO codes, contact info, and ground handler assignments
+- **Airports** - Global airport reference data (origin/destination for routes)
+- **Aircraft Types** - Aircraft specifications including wingspan, capacity, wake turbulence category
+- **Routes** - Airline route configurations between airports with equipment info
+
+#### Airport Infrastructure
+
+- **Terminals** - Terminal buildings configuration
+- **Gates** - Boarding gates with type (contact/remote), capacity, and availability tracking
+- **Stands** - Aircraft parking stands/aprons with size codes and pushback requirements
+- **Check-in Counters** - Check-in desk allocation and grouping
+- **Baggage Carousels** - Baggage claim belt configuration
+- **Runways** - Runway specifications including dimensions and surface type
+- **Ground Handlers** - Ground handling agents with service capabilities
+
+All master data entities support:
+
+- ✅ Full CRUD operations (Create, Read, Update, Delete)
+- ✅ Search and filtering
+- ✅ Soft delete (is_active flag)
+- ✅ Audit trails (created_at, updated_at timestamps)
+- ✅ Bootstrap 5 styled forms and tables
+
+### 🚧 Operational Modules (Planned)
+
+1. **schedules** - Seasonal and daily flight plans (SSIM import)
+2. **allocation** - Constraint-based gate and check-in assignment engine
+3. **fids** - Real-time Flight Information Display System
+4. **billing** - Aeronautical fee calculation
+5. **bi_stats** - Analytics dashboards using TimescaleDB hyper-functions
 
 ## 🔧 Development
 
