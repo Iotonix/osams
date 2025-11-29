@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "core_app",
     "masterdata",
     "flight_ops",
+    "schedules",
 ]
 
 MIDDLEWARE = [

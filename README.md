@@ -51,7 +51,7 @@
 
 ## 📁 Project Structure
 
-```
+```bash
 osams/
 ├── core_app/                 # Main application
 │   ├── views.py             # Authentication & dashboard views
