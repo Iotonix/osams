@@ -235,13 +235,54 @@ All master data entities support:
 - ✅ Audit trails (created_at, updated_at timestamps)
 - ✅ Bootstrap 5 styled forms and tables
 
+### ✅ Schedules (Implemented)
+
+The **schedules** module manages seasonal flight schedules:
+
+- **Seasonal Flights** - Template-based flight schedules with:
+  - Airline, flight number, route (origin/destination)
+  - Aircraft type and schedule times (STD/STA)
+  - Season dates (start/end) and days of operation
+  - Active/inactive status for planning flexibility
+- **Seeding Command** - Generate 1,200+ seasonal flights from route data with intelligent frequency distribution
+- **Full CRUD** - Add, edit, delete seasonal flight templates
+
+### ✅ Flight Operations (Implemented)
+
+The **flight_ops** module handles daily flight operations with advanced features:
+
+- **Daily Flights** - Concrete flight instances with:
+  - Complete timeline tracking (scheduled, estimated, actual times for departure/arrival)
+  - Resource allocation (gates, stands, check-in counters, baggage carousels)
+  - Flight status management (scheduled, boarding, departed, arrived, cancelled, etc.)
+  - Manual modification tracking for operational changes
+  - Public remarks and QR code data
+
+- **Rolling Window Strategy** - Template & Instance pattern:
+  - **Seasonal Flights** = "Perfect Plan" (templates)
+  - **Daily Flights** = "Concrete Reality" (instances)
+  - Auto-generate 90-day advance window from templates
+  - Smart propagation respects manual modifications (dirty flag pattern)
+  - 48-hour buffer before auto-updates to protect near-term ops
+
+- **Management Commands:**
+  - `generate_daily_flights` - Create daily instances from seasonal templates (90-day rolling window)
+  - `propagate_schedule_changes` - Sync template changes to future flights (respects manual edits)
+
+- **Performance Optimizations:**
+  - **Django-Select2** - AJAX autocomplete for airlines/airports (0.4s load time vs 5s)
+  - Query caching (5-minute cache for frequently used IDs)
+  - Date-based pagination (~880 flights/day instead of 78K total)
+  - Logging for performance monitoring
+
+- **Data Volume:** Currently managing 78,380 daily flight records across 94 airlines and 122 airports
+
 ### 🚧 Operational Modules (Planned)
 
-1. **schedules** - Seasonal and daily flight plans (SSIM import)
-2. **allocation** - Constraint-based gate and check-in assignment engine
-3. **fids** - Real-time Flight Information Display System
-4. **billing** - Aeronautical fee calculation
-5. **bi_stats** - Analytics dashboards using TimescaleDB hyper-functions
+1. **allocation** - Constraint-based gate and check-in assignment engine
+2. **fids** - Real-time Flight Information Display System (WebSocket-driven)
+3. **billing** - Aeronautical fee calculation
+4. **bi_stats** - Analytics dashboards using TimescaleDB hyper-functions
 
 ## 🔧 Development
 
@@ -301,7 +342,8 @@ This project is open source. See LICENSE file for details.
 - Celery worker integration pending
 - Redis cache configuration pending
 - Django Channels for WebSocket support pending
-- Core modules (schedules, allocation, fids, billing) to be implemented
+- Resource allocation algorithm to be implemented
+- SSIM import functionality pending
 
 ## 📮 Contact
 
