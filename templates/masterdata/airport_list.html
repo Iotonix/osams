@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Airports - OS-AMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h4 mb-1">Airports</h2>
+        <p class="text-muted">Global airports reference data</p>
+    </div>
+    <a href="{% url 'masterdata:add_airport' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Add Airport
+    </a>
+</div>
+
+<!-- Search Bar -->
+<div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <input type="text" 
+                       name="search" 
+                       class="form-control" 
+                       placeholder="Search by IATA, ICAO, name, city, or country..." 
+                       value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-1"></i>Search
+                </button>
+            </div>
+        </form>
+        {% if search_query %}
+        <div class="mt-2">
+            <a href="{% url 'masterdata:airport_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i>Clear Search
+            </a>
+            <span class="text-muted ms-2">Showing {{ total_count }} result{{ total_count|pluralize }}</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>IATA</th>
+                            <th>ICAO</th>
+                            <th>Name</th>
+                            <th>City</th>
+                            <th>Country</th>
+                            <th>Coordinates</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for airport in page_obj %}
+                        <tr>
+                            <td><span class="badge bg-primary">{{ airport.iata_code }}</span></td>
+                            <td><span class="badge bg-info">{{ airport.icao_code }}</span></td>
+                            <td class="fw-bold">{{ airport.name }}</td>
+                            <td>{{ airport.city }}</td>
+                            <td>{{ airport.country }}</td>
+                            <td>
+                                {% if airport.latitude and airport.longitude %}
+                                <small class="text-muted">{{ airport.latitude|floatformat:2 }}, {{ airport.longitude|floatformat:2 }}</small>
+                                {% else %}
+                                <small class="text-muted">—</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'masterdata:edit_airport' airport.pk %}"
+                                   class="btn btn-sm btn-light"
+                                   title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="{% url 'masterdata:delete_airport' airport.pk %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ airport.iata_code }}?');">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="btn btn-sm btn-light text-danger"
+                                            title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                {% if search_query %}
+                                No airports found matching "{{ search_query }}"
+                                {% else %}
+                                No airports found
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="mt-3">
+        <nav aria-label="Airport pagination">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;&laquo;</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="text-center text-muted">
+            <small>
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} 
+                ({{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} airports)
+            </small>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 # Re-export all views for backward compatibility
 from .airlines import airline_list, add_airline, edit_airline, delete_airline
+from .airports import airport_list, add_airport, edit_airport, delete_airport
 from .aircraft import aircraft_list, add_aircraft, edit_aircraft, delete_aircraft
 from .terminals import terminal_list, add_terminal, edit_terminal, delete_terminal
 from .gates import gate_list, add_gate, edit_gate, delete_gate
@@ -13,6 +14,11 @@ __all__ = [
     "add_airline",
     "edit_airline",
     "delete_airline",
+    # Airports
+    "airport_list",
+    "add_airport",
+    "edit_airport",
+    "delete_airport",
     # Aircraft
     "aircraft_list",
     "add_aircraft",

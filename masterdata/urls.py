@@ -5,6 +5,11 @@ from .views import (
     add_airline,
     edit_airline,
     delete_airline,
+    # Airports
+    airport_list,
+    add_airport,
+    edit_airport,
+    delete_airport,
     # Aircraft
     aircraft_list,
     add_aircraft,
@@ -45,6 +50,11 @@ urlpatterns = [
     path("airlines/add/", add_airline, name="add_airline"),
     path("airlines/<int:pk>/edit/", edit_airline, name="edit_airline"),
     path("airlines/<int:pk>/delete/", delete_airline, name="delete_airline"),
+    # Airports
+    path("airports/", airport_list, name="airport_list"),
+    path("airports/add/", add_airport, name="add_airport"),
+    path("airports/<int:pk>/edit/", edit_airport, name="edit_airport"),
+    path("airports/<int:pk>/delete/", delete_airport, name="delete_airport"),
     # Aircraft Types
     path("aircraft/", aircraft_list, name="aircraft_list"),
     path("aircraft/add/", add_aircraft, name="add_aircraft"),

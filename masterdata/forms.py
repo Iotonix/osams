@@ -1,6 +1,7 @@
 from django import forms
 from .models import (
     Airline,
+    Airport,
     AircraftType,
     Terminal,
     Gate,
@@ -39,6 +40,21 @@ class AirlineForm(BootstrapFormMixin, forms.ModelForm):
             "country",
             "contact_email",
             "contact_phone",
+            "is_active",
+        ]
+
+
+class AirportForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = Airport
+        fields = [
+            "iata_code",
+            "icao_code",
+            "name",
+            "city",
+            "country",
+            "latitude",
+            "longitude",
             "is_active",
         ]
 
