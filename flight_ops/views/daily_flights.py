@@ -1,3 +1,4 @@
+import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -7,12 +8,28 @@ from django.views.decorators.http import require_http_methods
 from ..forms import DailyFlightForm
 from ..models import DailyFlight
 
+logger = logging.getLogger(__name__)
+
 
 @login_required
 def daily_flight_list(request):
     """Display list of all daily flights with search"""
+    from datetime import date, timedelta
+
     search_query = request.GET.get("search", "")
     status_filter = request.GET.get("status", "")
+    date_filter = request.GET.get("date", "")
+
+    # Parse date filter (default to today)
+    if date_filter:
+        try:
+            from datetime import datetime
+
+            selected_date = datetime.strptime(date_filter, "%Y-%m-%d").date()
+        except ValueError:
+            selected_date = date.today()
+    else:
+        selected_date = date.today()
 
     daily_flights = DailyFlight.objects.select_related(
         "airline",
@@ -24,6 +41,9 @@ def daily_flight_list(request):
         "carousel",
         "schedule",
     ).prefetch_related("checkin_counters")
+
+    # Filter by selected date
+    daily_flights = daily_flights.filter(date_of_operation=selected_date)
 
     # Apply search filter if provided
     if search_query:
@@ -39,7 +59,13 @@ def daily_flight_list(request):
     if status_filter:
         daily_flights = daily_flights.filter(status=status_filter)
 
-    daily_flights = daily_flights.order_by("-date_of_operation", "stod", "airline", "flight_number")
+    daily_flights = daily_flights.order_by("stod", "airline", "flight_number")
+
+    # Calculate prev/next dates
+    prev_date = selected_date - timedelta(days=1)
+    next_date = selected_date + timedelta(days=1)
+
+    logger.info(f"Daily flight list view loaded: {daily_flights.count()} flights for {selected_date}")
 
     return render(
         request,
@@ -48,6 +74,9 @@ def daily_flight_list(request):
             "daily_flights": daily_flights,
             "search_query": search_query,
             "status_filter": status_filter,
+            "selected_date": selected_date,
+            "prev_date": prev_date,
+            "next_date": next_date,
             "status_choices": DailyFlight.STATUS_CHOICES,
         },
     )
@@ -65,9 +94,12 @@ def add_daily_flight(request):
                 request,
                 f"Daily Flight '{daily_flight.airline.iata_code}{daily_flight.flight_number}' created successfully.",
             )
+            logger.info(f"Daily flight created: {daily_flight.airline.iata_code}{daily_flight.flight_number} by {request.user}")
             return redirect("flight_ops:daily_flight_list")
     else:
         form = DailyFlightForm()
+
+    logger.info(f"Add daily flight form loaded for user {request.user}")
 
     return render(
         request,
@@ -80,7 +112,12 @@ def add_daily_flight(request):
 @require_http_methods(["GET", "POST"])
 def edit_daily_flight(request, pk):
     """Handle GET (render form with instance) and POST (update daily flight)"""
-    daily_flight = get_object_or_404(DailyFlight, pk=pk)
+    daily_flight = get_object_or_404(
+        DailyFlight.objects.select_related("airline", "origin", "destination", "aircraft_type", "gate", "stand", "carousel", "schedule").prefetch_related(
+            "checkin_counters"
+        ),
+        pk=pk,
+    )
 
     if request.method == "POST":
         form = DailyFlightForm(request.POST, instance=daily_flight)
@@ -95,9 +132,12 @@ def edit_daily_flight(request, pk):
                 request,
                 f"Daily Flight '{daily_flight.airline.iata_code}{daily_flight.flight_number}' updated successfully.",
             )
+            logger.info(f"Daily flight updated: {daily_flight.airline.iata_code}{daily_flight.flight_number} (pk={pk}) by {request.user}")
             return redirect("flight_ops:daily_flight_list")
     else:
         form = DailyFlightForm(instance=daily_flight)
+
+    logger.info(f"Edit daily flight form loaded: {daily_flight.airline.iata_code}{daily_flight.flight_number} (pk={pk}) for user {request.user}")
 
     return render(
         request,

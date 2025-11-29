@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
+from schedules.models import SeasonalFlight
 
 from flight_ops.models import DailyFlight
-from schedules.models import SeasonalFlight
 
 
 class Command(BaseCommand):
