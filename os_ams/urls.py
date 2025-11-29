@@ -25,4 +25,6 @@ urlpatterns = [
     path("logout/", views.user_logout, name="logout"),
     path("", views.dashboard, name="dashboard"),
     path("masterdata/", include("masterdata.urls")),
+    path("schedules/", include("schedules.urls")),
+    path("flight-ops/", include("flight_ops.urls")),
 ]

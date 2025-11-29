@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - OS-AMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row g-3">
+                        <!-- Basic Flight Info -->
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">Basic Information</h6>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.schedule.id_for_label }}" class="form-label">Seasonal Flight (Optional)</label>
+                            {{ form.schedule }}
+                            {% if form.schedule.errors %}
+                            <div class="invalid-feedback d-block">{{ form.schedule.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.airline.id_for_label }}" class="form-label">Airline *</label>
+                            {{ form.airline }}
+                            {% if form.airline.errors %}
+                            <div class="invalid-feedback d-block">{{ form.airline.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.flight_number.id_for_label }}" class="form-label">Flight Number *</label>
+                            {{ form.flight_number }}
+                            {% if form.flight_number.errors %}
+                            <div class="invalid-feedback d-block">{{ form.flight_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.origin.id_for_label }}" class="form-label">Origin *</label>
+                            {{ form.origin }}
+                            {% if form.origin.errors %}
+                            <div class="invalid-feedback d-block">{{ form.origin.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.destination.id_for_label }}" class="form-label">Destination *</label>
+                            {{ form.destination }}
+                            {% if form.destination.errors %}
+                            <div class="invalid-feedback d-block">{{ form.destination.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.aircraft_type.id_for_label }}" class="form-label">Aircraft Type *</label>
+                            {{ form.aircraft_type }}
+                            {% if form.aircraft_type.errors %}
+                            <div class="invalid-feedback d-block">{{ form.aircraft_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.date_of_operation.id_for_label }}" class="form-label">Date *</label>
+                            {{ form.date_of_operation }}
+                            {% if form.date_of_operation.errors %}
+                            <div class="invalid-feedback d-block">{{ form.date_of_operation.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.flight_id.id_for_label }}" class="form-label">Flight ID *</label>
+                            {{ form.flight_id }}
+                            {% if form.flight_id.errors %}
+                            <div class="invalid-feedback d-block">{{ form.flight_id.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.registration.id_for_label }}" class="form-label">Registration</label>
+                            {{ form.registration }}
+                            {% if form.registration.errors %}
+                            <div class="invalid-feedback d-block">{{ form.registration.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Status -->
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3 mt-3">Status</h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">Flight Status *</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="invalid-feedback d-block">{{ form.status.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Departure Times -->
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3 mt-3">Departure Times</h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.stod.id_for_label }}" class="form-label">Scheduled Time of Departure *</label>
+                            {{ form.stod }}
+                            {% if form.stod.errors %}
+                            <div class="invalid-feedback d-block">{{ form.stod.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.etod.id_for_label }}" class="form-label">Estimated Time of Departure</label>
+                            {{ form.etod }}
+                            {% if form.etod.errors %}
+                            <div class="invalid-feedback d-block">{{ form.etod.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.aobt.id_for_label }}" class="form-label">Actual Off-Block Time</label>
+                            {{ form.aobt }}
+                            {% if form.aobt.errors %}
+                            <div class="invalid-feedback d-block">{{ form.aobt.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.atod.id_for_label }}" class="form-label">Actual Time of Departure</label>
+                            {{ form.atod }}
+                            {% if form.atod.errors %}
+                            <div class="invalid-feedback d-block">{{ form.atod.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Arrival Times -->
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3 mt-3">Arrival Times</h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.stoa.id_for_label }}" class="form-label">Scheduled Time of Arrival *</label>
+                            {{ form.stoa }}
+                            {% if form.stoa.errors %}
+                            <div class="invalid-feedback d-block">{{ form.stoa.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.etoa.id_for_label }}" class="form-label">Estimated Time of Arrival</label>
+                            {{ form.etoa }}
+                            {% if form.etoa.errors %}
+                            <div class="invalid-feedback d-block">{{ form.etoa.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.atoa.id_for_label }}" class="form-label">Actual Time of Arrival</label>
+                            {{ form.atoa }}
+                            {% if form.atoa.errors %}
+                            <div class="invalid-feedback d-block">{{ form.atoa.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.aibt.id_for_label }}" class="form-label">Actual In-Block Time</label>
+                            {{ form.aibt }}
+                            {% if form.aibt.errors %}
+                            <div class="invalid-feedback d-block">{{ form.aibt.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Resources -->
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3 mt-3">Resource Allocation</h6>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.gate.id_for_label }}" class="form-label">Gate</label>
+                            {{ form.gate }}
+                            {% if form.gate.errors %}
+                            <div class="invalid-feedback d-block">{{ form.gate.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.stand.id_for_label }}" class="form-label">Stand</label>
+                            {{ form.stand }}
+                            {% if form.stand.errors %}
+                            <div class="invalid-feedback d-block">{{ form.stand.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="{{ form.carousel.id_for_label }}" class="form-label">Baggage Carousel</label>
+                            {{ form.carousel }}
+                            {% if form.carousel.errors %}
+                            <div class="invalid-feedback d-block">{{ form.carousel.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="{{ form.checkin_counters.id_for_label }}" class="form-label">Check-in Counters</label>
+                            {{ form.checkin_counters }}
+                            {% if form.checkin_counters.errors %}
+                            <div class="invalid-feedback d-block">{{ form.checkin_counters.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Additional Info -->
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3 mt-3">Additional Information</h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.public_remark.id_for_label }}" class="form-label">Public Remark</label>
+                            {{ form.public_remark }}
+                            {% if form.public_remark.errors %}
+                            <div class="invalid-feedback d-block">{{ form.public_remark.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.qr_code_data.id_for_label }}" class="form-label">QR Code Data</label>
+                            {{ form.qr_code_data }}
+                            {% if form.qr_code_data.errors %}
+                            <div class="invalid-feedback d-block">{{ form.qr_code_data.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>{{ action }}
+                        </button>
+                        <a href="{% url 'flight_ops:daily_flight_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
