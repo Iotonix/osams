@@ -40,6 +40,21 @@ from .views import (
     add_carousel,
     edit_carousel,
     delete_carousel,
+    # Ground Handlers
+    groundhandler_list,
+    add_groundhandler,
+    edit_groundhandler,
+    delete_groundhandler,
+    # Routes
+    route_list,
+    add_route,
+    edit_route,
+    delete_route,
+    # Runways
+    runway_list,
+    add_runway,
+    edit_runway,
+    delete_runway,
 )
 
 app_name = "masterdata"
@@ -85,4 +100,19 @@ urlpatterns = [
     path("carousels/add/", add_carousel, name="add_carousel"),
     path("carousels/<int:pk>/edit/", edit_carousel, name="edit_carousel"),
     path("carousels/<int:pk>/delete/", delete_carousel, name="delete_carousel"),
+    # Ground Handlers
+    path("groundhandlers/", groundhandler_list, name="groundhandler_list"),
+    path("groundhandlers/add/", add_groundhandler, name="add_groundhandler"),
+    path("groundhandlers/<int:pk>/edit/", edit_groundhandler, name="edit_groundhandler"),
+    path("groundhandlers/<int:pk>/delete/", delete_groundhandler, name="delete_groundhandler"),
+    # Routes
+    path("routes/", route_list, name="route_list"),
+    path("routes/add/", add_route, name="add_route"),
+    path("routes/<int:pk>/edit/", edit_route, name="edit_route"),
+    path("routes/<int:pk>/delete/", delete_route, name="delete_route"),
+    # Runways
+    path("runways/", runway_list, name="runway_list"),
+    path("runways/add/", add_runway, name="add_runway"),
+    path("runways/<int:pk>/edit/", edit_runway, name="edit_runway"),
+    path("runways/<int:pk>/delete/", delete_runway, name="delete_runway"),
 ]

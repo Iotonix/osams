@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Ground Handlers - OS-AMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h4 mb-1">Ground Handlers</h2>
+        <p class="text-muted">Ground handling service providers</p>
+    </div>
+    <a href="{% url 'masterdata:add_groundhandler' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Add Ground Handler
+    </a>
+</div>
+
+<!-- Search Bar -->
+<div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control border-start-0" 
+                           name="search" 
+                           value="{{ search_query }}" 
+                           placeholder="Search by code or name...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-1"></i>Search
+                </button>
+            </div>
+        </form>
+        {% if search_query %}
+        <div class="mt-2">
+            <a href="{% url 'masterdata:groundhandler_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i>Clear Search
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div>
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Services</th>
+                                <th>Contact</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for handler in handlers %}
+                            <tr>
+                                <td><span class="badge bg-primary">{{ handler.code }}</span></td>
+                                <td class="fw-bold">{{ handler.name }}</td>
+                                <td>
+                                    {% if handler.provides_passenger %}
+                                    <span class="badge bg-success me-1">Passenger</span>
+                                    {% endif %}
+                                    {% if handler.provides_ramp %}
+                                    <span class="badge bg-info me-1">Ramp</span>
+                                    {% endif %}
+                                    {% if handler.provides_cargo %}
+                                    <span class="badge bg-warning text-dark">Cargo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if handler.contact_email %}
+                                    <small class="text-muted">{{ handler.contact_email }}</small>
+                                    {% else %}
+                                    <small class="text-muted">—</small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{% url 'masterdata:edit_groundhandler' handler.pk %}"
+                                       class="btn btn-sm btn-light"
+                                       title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'masterdata:delete_groundhandler' handler.pk %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ handler.name }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                class="btn btn-sm btn-light text-danger"
+                                                title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                    No ground handlers found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3 text-muted">
+            <small>Total: {{ handlers.count }} active ground handlers</small>
+        </div>
+</div>
+{% endblock %}

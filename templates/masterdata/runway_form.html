@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - OS-AMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            Runway Designator <span class="text-danger">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.name.errors }}
+                            </div>
+                        {% endif %}
+                        {% if form.name.help_text %}
+                            <small class="form-text text-muted">{{ form.name.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.length_meters.id_for_label }}" class="form-label">
+                                Length (meters) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.length_meters }}
+                            {% if form.length_meters.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.length_meters.errors }}
+                                </div>
+                            {% endif %}
+                            {% if form.length_meters.help_text %}
+                                <small class="form-text text-muted">{{ form.length_meters.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.width_meters.id_for_label }}" class="form-label">
+                                Width (meters) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.width_meters }}
+                            {% if form.width_meters.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.width_meters.errors }}
+                                </div>
+                            {% endif %}
+                            {% if form.width_meters.help_text %}
+                                <small class="form-text text-muted">{{ form.width_meters.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.surface.id_for_label }}" class="form-label">
+                            Surface Type <span class="text-danger">*</span>
+                        </label>
+                        {{ form.surface }}
+                        {% if form.surface.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.surface.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                Active
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'masterdata:runway_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>{{ action }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

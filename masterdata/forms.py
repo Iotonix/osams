@@ -8,6 +8,9 @@ from .models import (
     Stand,
     CheckInCounter,
     BaggageCarousel,
+    GroundHandler,
+    Route,
+    Runway,
 )
 
 
@@ -138,4 +141,45 @@ class BaggageCarouselForm(BootstrapFormMixin, forms.ModelForm):
             "is_active",
             "is_available",
             "notes",
+        ]
+
+
+class GroundHandlerForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = GroundHandler
+        fields = [
+            "code",
+            "name",
+            "contact_email",
+            "contact_phone",
+            "provides_passenger",
+            "provides_ramp",
+            "provides_cargo",
+            "is_active",
+        ]
+
+
+class RouteForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = Route
+        fields = [
+            "airline",
+            "origin",
+            "destination",
+            "codeshare",
+            "stops",
+            "equipment",
+            "is_active",
+        ]
+
+
+class RunwayForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = Runway
+        fields = [
+            "name",
+            "length_meters",
+            "width_meters",
+            "surface",
+            "is_active",
         ]
