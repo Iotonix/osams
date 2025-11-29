@@ -210,3 +210,26 @@ class BaggageCarousel(models.Model):
 
     def __str__(self):
         return f"{self.code} ({self.terminal.code})"
+
+
+class Runway(models.Model):
+    """Airport runways configurations"""
+
+    SURFACE_CHOICES = [
+        ("CONCRETE", "Concrete"),
+        ("ASPHALT", "Asphalt"),
+        ("GRASS", "Grass"),
+    ]
+
+    name = models.CharField(max_length=10, help_text="Designator (e.g., 09L/27R)")
+    length_meters = models.IntegerField(help_text="Total length in meters")
+    width_meters = models.IntegerField(help_text="Width in meters")
+    surface = models.CharField(max_length=10, choices=SURFACE_CHOICES, default="CONCRETE")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Runway"
+        verbose_name_plural = "Runways"
+
+    def __str__(self):
+        return f"Runway {self.name}"

@@ -6,7 +6,7 @@ This represents a typical airport with 3 terminals (T1 International, T2 Interna
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from masterdata.models import AircraftType, BaggageCarousel, CheckInCounter, Gate, Stand, Terminal
+from masterdata.models import AircraftType, BaggageCarousel, CheckInCounter, Gate, Runway, Stand, Terminal
 
 
 class Command(BaseCommand):
@@ -22,6 +22,7 @@ class Command(BaseCommand):
             Stand.objects.all().delete()
             CheckInCounter.objects.all().delete()
             BaggageCarousel.objects.all().delete()
+            Runway.objects.all().delete()
 
             # Create Terminals
             t1 = Terminal.objects.create(
@@ -239,3 +240,22 @@ class Command(BaseCommand):
                     "  • 20 remote stands (wide-body, narrow-body, regional, cargo/maint)\n"
                 )
             )
+
+            # add the runways 09L/27R and 09R/27L
+            Runway.objects.create(
+                name="09L/27R",
+                length_meters=3902,
+                width_meters=50,
+                surface="CONCRETE",
+                is_active=True,
+            )
+            Runway.objects.create(
+                name="09R/27L",
+                length_meters=3860,
+                width_meters=45,
+                surface="CONCRETE",
+                is_active=True,
+            )
+            self.stdout.write(self.style.SUCCESS(f"✓ Created {Runway.objects.count()} runways"))
+
+        self.stdout.write(self.style.SUCCESS("Airport infrastructure seed finished successfully."))
