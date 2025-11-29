@@ -1,6 +1,7 @@
 from django import forms
 from django.db import models
 from django.core.cache import cache
+from django_select2 import forms as s2forms
 from .models import DailyFlight
 
 
@@ -10,6 +11,9 @@ class BootstrapFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
+            # Skip Select2 widgets - they have their own styling
+            if isinstance(field.widget, (s2forms.ModelSelect2Widget, s2forms.ModelSelect2MultipleWidget)):
+                continue
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs["class"] = "form-check-input"
             elif isinstance(field.widget, forms.Select):
@@ -25,25 +29,25 @@ class BootstrapFormMixin:
 
 def get_cached_used_ids():
     """Get cached IDs of airlines/airports/aircraft actually used in DailyFlights"""
-    cache_key = 'dailyflight_form_ids'
+    cache_key = "dailyflight_form_ids"
     cached = cache.get(cache_key)
-    
+
     if cached:
         return cached
-    
+
     # Query once and cache for 5 minutes
     airline_ids = list(DailyFlight.objects.values_list("airline_id", flat=True).distinct())
     aircraft_ids = list(DailyFlight.objects.values_list("aircraft_type_id", flat=True).distinct())
     origin_ids = list(DailyFlight.objects.values_list("origin_id", flat=True).distinct())
     dest_ids = list(DailyFlight.objects.values_list("destination_id", flat=True).distinct())
     airport_ids = list(set(origin_ids) | set(dest_ids))
-    
+
     result = {
-        'airline_ids': airline_ids,
-        'aircraft_ids': aircraft_ids,
-        'airport_ids': airport_ids,
+        "airline_ids": airline_ids,
+        "aircraft_ids": aircraft_ids,
+        "airport_ids": airport_ids,
     }
-    
+
     cache.set(cache_key, result, 300)  # Cache for 5 minutes
     return result
 
@@ -52,7 +56,6 @@ class DailyFlightForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = DailyFlight
         fields = [
-            "schedule",
             "airline",
             "flight_number",
             "origin",
@@ -75,9 +78,30 @@ class DailyFlightForm(BootstrapFormMixin, forms.ModelForm):
             "checkin_counters",
             "carousel",
             "public_remark",
-            "qr_code_data",
         ]
         widgets = {
+            # Use AJAX autocomplete for large dropdowns (fast loading)
+            "airline": s2forms.ModelSelect2Widget(
+                model=DailyFlight._meta.get_field("airline").related_model,
+                search_fields=["iata_code__icontains", "name__icontains"],
+                attrs={"data-minimum-input-length": 0},
+            ),
+            "origin": s2forms.ModelSelect2Widget(
+                model=DailyFlight._meta.get_field("origin").related_model,
+                search_fields=["iata_code__icontains", "name__icontains", "city__icontains"],
+                attrs={"data-minimum-input-length": 0},
+            ),
+            "destination": s2forms.ModelSelect2Widget(
+                model=DailyFlight._meta.get_field("destination").related_model,
+                search_fields=["iata_code__icontains", "name__icontains", "city__icontains"],
+                attrs={"data-minimum-input-length": 0},
+            ),
+            "aircraft_type": s2forms.ModelSelect2Widget(
+                model=DailyFlight._meta.get_field("aircraft_type").related_model,
+                search_fields=["iata_code__icontains", "manufacturer__icontains", "model__icontains"],
+                attrs={"data-minimum-input-length": 0},
+            ),
+            # Regular widgets for other fields
             "date_of_operation": forms.DateInput(attrs={"type": "date"}),
             "stod": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "etod": forms.DateTimeInput(attrs={"type": "datetime-local"}),
@@ -87,24 +111,23 @@ class DailyFlightForm(BootstrapFormMixin, forms.ModelForm):
             "etoa": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "atoa": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "aibt": forms.DateTimeInput(attrs={"type": "datetime-local"}),
-            "qr_code_data": forms.Textarea(attrs={"rows": 2}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # AGGRESSIVE optimization with caching - only load records actually used
+        # Filter querysets to only used records for Select2 autocomplete
         from masterdata.models import Airline, Airport, AircraftType, Gate, Stand, CheckInCounter, BaggageCarousel
 
         # Get cached IDs (avoids repeated slow queries)
         ids = get_cached_used_ids()
-        
-        # Load ONLY the records actually used (94 airlines instead of 831, 122 airports instead of 6067)
-        self.fields["airline"].queryset = Airline.objects.filter(id__in=ids['airline_ids'])
-        self.fields["aircraft_type"].queryset = AircraftType.objects.filter(id__in=ids['aircraft_ids'])
-        self.fields["origin"].queryset = Airport.objects.filter(id__in=ids['airport_ids'])
-        self.fields["destination"].queryset = self.fields["origin"].queryset
 
-        # Resources - load all (small sets: 38 gates, 20 stands, etc.)
+        # Set querysets for Select2 widgets - they'll load via AJAX but this filters what's available
+        self.fields["airline"].queryset = Airline.objects.filter(id__in=ids["airline_ids"])
+        self.fields["aircraft_type"].queryset = AircraftType.objects.filter(id__in=ids["aircraft_ids"])
+        self.fields["origin"].queryset = Airport.objects.filter(id__in=ids["airport_ids"])
+        self.fields["destination"].queryset = Airport.objects.filter(id__in=ids["airport_ids"])
+
+        # Resources - small sets, regular dropdowns are fine
         self.fields["gate"].queryset = Gate.objects.filter(is_active=True)
         self.fields["stand"].queryset = Stand.objects.filter(is_active=True)
         self.fields["checkin_counters"].queryset = CheckInCounter.objects.filter(is_active=True)

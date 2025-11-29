@@ -27,4 +27,5 @@ urlpatterns = [
     path("masterdata/", include("masterdata.urls")),
     path("schedules/", include("schedules.urls")),
     path("flight-ops/", include("flight_ops.urls")),
+    path("select2/", include("django_select2.urls")),  # AJAX autocomplete endpoints
 ]

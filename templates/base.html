@@ -14,6 +14,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Select2 CSS for AJAX autocomplete -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20251122">
@@ -75,6 +79,10 @@
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery (required for Select2) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Select2 JS for AJAX autocomplete -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <!-- Chart.js -->
@@ -82,6 +90,17 @@
 
     <!-- Custom JS -->
     <script src="{% static 'js/script.js' %}?v=20251122"></script>
+    
+    <!-- Initialize django-select2 -->
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 with Bootstrap 5 theme
+            $('.django-select2').select2({
+                theme: 'bootstrap-5',
+                width: '100%'
+            });
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>
