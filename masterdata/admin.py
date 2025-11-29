@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Airline, AircraftType, Terminal, Gate, Stand, CheckInCounter, BaggageCarousel
+from .models import Airline, AircraftType, Airport, Terminal, Gate, Stand, CheckInCounter, BaggageCarousel
 
 
 @admin.register(Airline)
@@ -16,6 +16,14 @@ class AircraftTypeAdmin(admin.ModelAdmin):
     list_filter = ["size_category", "wake_turbulence", "is_active", "manufacturer"]
     search_fields = ["icao_code", "iata_code", "manufacturer", "model"]
     ordering = ["icao_code"]
+
+
+@admin.register(Airport)
+class AirportAdmin(admin.ModelAdmin):
+    list_display = ["iata_code", "icao_code", "name", "city", "country", "is_active"]
+    list_filter = ["is_active", "country"]
+    search_fields = ["iata_code", "icao_code", "name", "city"]
+    ordering = ["iata_code"]
 
 
 @admin.register(Terminal)

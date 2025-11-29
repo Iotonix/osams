@@ -7,7 +7,7 @@ import requests
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from masterdata.models import AircraftType, Airline
+from masterdata.models import AircraftType, Airline, Airport
 
 
 class Command(BaseCommand):
@@ -21,6 +21,9 @@ class Command(BaseCommand):
 
         # 2. SEED AIRCRAFT
         self.seed_aircraft()
+
+        # 3. SEED AIRPORTS (New)
+        self.seed_airports()
 
         self.stdout.write(self.style.SUCCESS("Data seeding completed successfully!"))
 
@@ -105,3 +108,48 @@ class Command(BaseCommand):
                     continue
 
         self.stdout.write(self.style.SUCCESS(f"Imported/Updated {count} Aircraft Types."))
+
+    def seed_airports(self):
+        url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
+        self.stdout.write(f"Fetching Airports from {url}...")
+
+        response = requests.get(url)
+        content = response.content.decode("utf-8")
+        csv_reader = csv.reader(io.StringIO(content), delimiter=",")
+
+        count = 0
+        with transaction.atomic():
+            for row in csv_reader:
+                # OpenFlights airports.dat Format:
+                # 0: ID, 1: Name, 2: City, 3: Country, 4: IATA, 5: ICAO, 6: Lat, 7: Lon ...
+                try:
+                    name = row[1]
+                    city = row[2]
+                    country = row[3]
+                    iata = row[4]
+                    icao = row[5]
+                    lat = row[6]
+                    lon = row[7]
+
+                    # Filter: Require both IATA (3 chars) and ICAO (4 chars)
+                    # Many small airports in the dataset use "\N" or empty strings for missing codes
+                    if len(iata) == 3 and len(icao) == 4 and iata != "\\N" and icao != "\\N":
+                        Airport.objects.update_or_create(
+                            icao_code=icao,
+                            defaults={
+                                "iata_code": iata,
+                                "name": name,
+                                "city": city,
+                                "country": country,
+                                "latitude": lat,
+                                "longitude": lon,
+                                "is_active": True,
+                            },
+                        )
+                        count += 1
+                except IndexError:
+                    continue
+                except Exception as e:
+                    continue
+
+        self.stdout.write(self.style.SUCCESS(f"Imported/Updated {count} Airports."))

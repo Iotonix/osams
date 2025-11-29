@@ -24,6 +24,33 @@ class Airline(models.Model):
         return f"{self.iata_code} - {self.name}"
 
 
+# masterdata/models.py
+
+
+class Airport(models.Model):
+    """Global airports reference data for Flight Schedules (Origin/Destination)"""
+
+    iata_code = models.CharField(max_length=3, unique=True, validators=[RegexValidator(r"^[A-Z]{3}$")], help_text="3-letter IATA code (e.g., LHR, DXB)")
+    icao_code = models.CharField(max_length=4, unique=True, validators=[RegexValidator(r"^[A-Z]{4}$")], help_text="4-letter ICAO code (e.g., EGLL, OMDB)")
+    name = models.CharField(max_length=200)
+    city = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["iata_code"]
+        verbose_name = "Airport"
+        verbose_name_plural = "Airports"
+
+    def __str__(self):
+        return f"{self.iata_code} - {self.city} ({self.name})"
+
+
 class AircraftType(models.Model):
     """Aircraft types and their specifications"""
 
