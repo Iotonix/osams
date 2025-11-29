@@ -233,3 +233,24 @@ class Runway(models.Model):
 
     def __str__(self):
         return f"Runway {self.name}"
+
+
+class Route(models.Model):
+    """Established routes between airports operated by airlines"""
+
+    airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
+    origin = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="departing_routes")
+    destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="arriving_routes")
+    codeshare = models.BooleanField(default=False)
+    stops = models.IntegerField(default=0)
+    equipment = models.CharField(max_length=100, blank=True, null=True, help_text="Aircraft types (e.g., 320 777)")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        # A route is unique by Airline + Origin + Dest
+        unique_together = ["airline", "origin", "destination"]
+        verbose_name = "Route"
+        verbose_name_plural = "Routes"
+
+    def __str__(self):
+        return f"{self.airline.iata_code}: {self.origin.iata_code} -> {self.destination.iata_code}"

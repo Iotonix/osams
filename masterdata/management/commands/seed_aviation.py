@@ -7,7 +7,8 @@ import requests
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from masterdata.models import AircraftType, Airline, Airport
+from masterdata.models import AircraftType, Airline, Airport, Route
+from os_ams import settings
 
 
 class Command(BaseCommand):
@@ -16,14 +17,17 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write("Starting Aviation Data Seed...")
 
-        # 1. SEED AIRLINES
-        self.seed_airlines()
+        # # 1. SEED AIRLINES
+        # self.seed_airlines()
 
-        # 2. SEED AIRCRAFT
-        self.seed_aircraft()
+        # # 2. SEED AIRCRAFT
+        # self.seed_aircraft()
 
-        # 3. SEED AIRPORTS (New)
-        self.seed_airports()
+        # # 3. SEED AIRPORTS (New)
+        # self.seed_airports()
+
+        # 4. SEED ROUTES
+        self.seed_routes()
 
         self.stdout.write(self.style.SUCCESS("Data seeding completed successfully!"))
 
@@ -153,3 +157,65 @@ class Command(BaseCommand):
                     continue
 
         self.stdout.write(self.style.SUCCESS(f"Imported/Updated {count} Airports."))
+
+    def seed_routes(self):
+        url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat"
+        self.stdout.write(f"Fetching Routes from {url}...")
+
+        response = requests.get(url)
+        content = response.content.decode("utf-8")
+        csv_reader = csv.reader(io.StringIO(content), delimiter=",")
+
+        # Cache lookups to speed up processing (Critical for 60k+ routes)
+        # We map IATA/ICAO codes to database IDs
+        airlines_map = {a.iata_code: a.id for a in Airline.objects.all() if a.iata_code}
+        # Also map ICAO for airlines just in case
+        airlines_map.update({a.icao_code: a.id for a in Airline.objects.all() if a.icao_code})
+
+        # For airports, we map both IATA and ICAO to IDs
+        airports_map = {a.iata_code: a.id for a in Airport.objects.all() if a.iata_code}
+        airports_map.update({a.icao_code: a.id for a in Airport.objects.all() if a.icao_code})
+
+        routes_to_create = []
+        count = 0
+
+        self.stdout.write("Processing route data (this might take a moment)...")
+
+        for row in csv_reader:
+            # Format: 0:Airline, 1:ID, 2:Origin, 3:ID, 4:Dest, 5:ID, 6:Codeshare, 7:Stops, 8:Equip
+            try:
+                airline_code = row[0]
+                origin_code = row[2]
+                dest_code = row[4]
+                codeshare = row[6] == "Y"
+                stops = int(row[7]) if row[7] else 0
+                equipment = row[8]
+
+                # Fast Lookup
+                airline_id = airlines_map.get(airline_code)
+                origin_id = airports_map.get(origin_code)
+                dest_id = airports_map.get(dest_code)
+
+                # FILTER LOGIC:
+                # Only keep routes that touch our Home Airport (either Origin OR Destination)
+                is_outbound = (origin_code == settings.HOME_AIRPORT_IATA) or (origin_code == settings.HOME_AIRPORT_ICAO)
+                is_inbound = (dest_code == settings.HOME_AIRPORT_IATA) or (dest_code == settings.HOME_AIRPORT_ICAO)
+                if not (is_outbound or is_inbound):
+                    continue  # Skip this route, it's irrelevant to us
+
+                if airline_id and origin_id and dest_id:
+                    # We use bulk_create for routes because checking get_or_create
+                    # for 67,000 routes is too slow one-by-one.
+                    routes_to_create.append(
+                        Route(airline_id=airline_id, origin_id=origin_id, destination_id=dest_id, codeshare=codeshare, stops=stops, equipment=equipment)
+                    )
+                    count += 1
+            except (IndexError, ValueError):
+                continue
+
+        # Bulk Create to save time
+        # ignore_conflicts=True handles duplicates defined in unique_together
+        with transaction.atomic():
+            Route.objects.bulk_create(routes_to_create, batch_size=1000, ignore_conflicts=True)
+
+        self.stdout.write(self.style.SUCCESS(f"Imported {count} Routes."))

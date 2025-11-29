@@ -181,3 +181,7 @@ LOGGING = {
         },
     },
 }
+
+
+HOME_AIRPORT_IATA = "BKK"  # Change this to your airport
+HOME_AIRPORT_ICAO = "VTBS"  # Change this to your airport
