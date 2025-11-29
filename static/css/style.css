@@ -255,3 +255,58 @@ body {
     right: 1rem;
     z-index: 2;
 }
+
+/* =========================================
+   SELECT2 DARK MODE SUPPORT
+   ========================================= */
+
+/* Select2 container - full width */
+.select2-container {
+    width: 100% !important;
+}
+
+/* Dark mode for Select2 dropdown */
+[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown {
+    background-color: #1e1e2d;
+    border-color: #2b2b40;
+    color: #e1e1e1;
+}
+
+[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-search__field {
+    background-color: #151521;
+    border-color: #2b2b40;
+    color: #e1e1e1;
+}
+
+[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option {
+    color: #e1e1e1;
+}
+
+[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background-color: #3699FF;
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection {
+    background-color: #1e1e2d;
+    border-color: #2b2b40;
+    color: #e1e1e1;
+}
+
+[data-bs-theme="dark"] .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+    border-color: #3699FF;
+    box-shadow: 0 0 0 0.25rem rgba(54, 153, 255, 0.25);
+}
+
+[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection__rendered {
+    color: #e1e1e1;
+}
+
+[data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection__placeholder {
+    color: #a2a3b7;
+}
+
+/* Light mode adjustments */
+.select2-container--bootstrap-5 .select2-selection {
+    min-height: calc(1.5em + 0.75rem + 2px);
+}

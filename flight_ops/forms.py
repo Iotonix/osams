@@ -83,19 +83,43 @@ class DailyFlightForm(BootstrapFormMixin, forms.ModelForm):
             # Use AJAX autocomplete for large dropdowns (fast loading)
             "airline": s2forms.ModelSelect2Widget(
                 search_fields=["iata_code__icontains", "name__icontains"],
-                attrs={"data-minimum-input-length": 0, "data-placeholder": "Select airline..."},
+                attrs={
+                    "data-minimum-input-length": 0,
+                    "data-placeholder": "Select airline...",
+                    "data-width": "100%",
+                    "data-theme": "bootstrap-5",
+                    "class": "form-control",
+                },
             ),
             "origin": s2forms.ModelSelect2Widget(
                 search_fields=["iata_code__icontains", "name__icontains", "city__icontains"],
-                attrs={"data-minimum-input-length": 0, "data-placeholder": "Select origin airport..."},
+                attrs={
+                    "data-minimum-input-length": 0,
+                    "data-placeholder": "Select origin airport...",
+                    "data-width": "100%",
+                    "data-theme": "bootstrap-5",
+                    "class": "form-control",
+                },
             ),
             "destination": s2forms.ModelSelect2Widget(
                 search_fields=["iata_code__icontains", "name__icontains", "city__icontains"],
-                attrs={"data-minimum-input-length": 0, "data-placeholder": "Select destination airport..."},
+                attrs={
+                    "data-minimum-input-length": 0,
+                    "data-placeholder": "Select destination airport...",
+                    "data-width": "100%",
+                    "data-theme": "bootstrap-5",
+                    "class": "form-control",
+                },
             ),
             "aircraft_type": s2forms.ModelSelect2Widget(
                 search_fields=["iata_code__icontains", "manufacturer__icontains", "model__icontains"],
-                attrs={"data-minimum-input-length": 0, "data-placeholder": "Select aircraft type..."},
+                attrs={
+                    "data-minimum-input-length": 0,
+                    "data-placeholder": "Select aircraft type...",
+                    "data-width": "100%",
+                    "data-theme": "bootstrap-5",
+                    "class": "form-control",
+                },
             ),
             # Regular widgets for other fields
             "date_of_operation": forms.DateInput(attrs={"type": "date"}),
