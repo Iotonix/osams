@@ -6,7 +6,7 @@ This represents a typical airport with 3 terminals (T1 International, T2 Interna
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from masterdata.models import AircraftType, BaggageCarousel, CheckInCounter, Gate, Runway, Stand, Terminal
+from masterdata.models import AircraftType, BaggageCarousel, CheckInCounter, Gate, GroundHandler, Runway, Stand, Terminal
 
 
 class Command(BaseCommand):
@@ -259,3 +259,58 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"✓ Created {Runway.objects.count()} runways"))
 
         self.stdout.write(self.style.SUCCESS("Airport infrastructure seed finished successfully."))
+
+        # ... inside the handle() method, after Baggage Carousels ...
+
+        # GROUND HANDLERS
+        self.stdout.write("Seeding Ground Handlers...")
+
+        handlers_data = [
+            {
+                "code": "TGGS",
+                "name": "THAI Ground Services",
+                "passenger": True,
+                "ramp": True,
+                "cargo": True,
+                "email": "customer.relations@thaiairways.com",
+            },
+            {
+                "code": "BFS",
+                "name": "Bangkok Flight Services",
+                "passenger": True,
+                "ramp": True,
+                "cargo": True,
+                "email": "info@bfs.co.th",
+            },
+            {
+                "code": "AOTGA",
+                "name": "AOT Ground Aviation Services",
+                "passenger": True,
+                "ramp": True,
+                "cargo": False,
+                "email": "commercial@aotga.com",
+            },
+            {
+                "code": "BAGS",
+                "name": "BAGS Ground Services",
+                "passenger": True,
+                "ramp": True,
+                "cargo": False,
+                "email": "info@bags-groundservices.com",
+            },
+        ]
+
+        for h in handlers_data:
+            GroundHandler.objects.update_or_create(
+                code=h["code"],
+                defaults={
+                    "name": h["name"],
+                    "provides_passenger": h["passenger"],
+                    "provides_ramp": h["ramp"],
+                    "provides_cargo": h["cargo"],
+                    "contact_email": h["email"],
+                    "is_active": True,
+                },
+            )
+
+        self.stdout.write(self.style.SUCCESS(f"✓ Created/Updated {len(handlers_data)} Ground Handlers"))

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Airline, AircraftType, Airport, Route, Runway, Terminal, Gate, Stand, CheckInCounter, BaggageCarousel
+from .models import Airline, AircraftType, Airport, GroundHandler, Route, Runway, Terminal, Gate, Stand, CheckInCounter, BaggageCarousel
 
 
 @admin.register(Airline)
@@ -75,16 +75,15 @@ class RunwayAdmin(admin.ModelAdmin):
     ordering = ["name"]
 
 
-# Routes
-# airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
-# origin = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="departing_routes")
-# destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="arriving_routes")
-# codeshare = models.BooleanField(default=False)
-# stops = models.IntegerField(default=0)
-# equipment = models.CharField(max_length=100, blank=True, null=True, help_text="Aircraft types (e.g., 320 777)")
 @admin.register(Route)
 class RouteAdmin(admin.ModelAdmin):
     list_display = ["origin", "destination", "airline", "codeshare", "stops", "is_active"]
     list_filter = ["is_active", "airline"]
     search_fields = ["origin__iata_code", "destination__iata_code", "airline__name", "airline__iata_code", "airline__icao_code"]
     ordering = ["origin", "destination", "airline"]
+
+
+@admin.register(GroundHandler)
+class GroundHandlerAdmin(admin.ModelAdmin):
+    list_display = ["code", "name", "provides_passenger", "provides_ramp", "is_active"]
+    search_fields = ["code", "name"]

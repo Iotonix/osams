@@ -9,6 +9,7 @@ class Airline(models.Model):
     icao_code = models.CharField(max_length=3, unique=True, validators=[RegexValidator(r"^[A-Z]{3}$")], help_text="3-letter ICAO code (e.g., THA, SIA)")
     name = models.CharField(max_length=200)
     country = models.CharField(max_length=100)
+    ground_handler = models.ForeignKey("GroundHandler", on_delete=models.SET_NULL, null=True, blank=True, related_name="airlines")
     contact_email = models.EmailField(blank=True, null=True)
     contact_phone = models.CharField(max_length=50, blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -254,3 +255,37 @@ class Route(models.Model):
 
     def __str__(self):
         return f"{self.airline.iata_code}: {self.origin.iata_code} -> {self.destination.iata_code}"
+
+
+# masterdata/models.py
+
+
+class GroundHandler(models.Model):
+    """Ground Handling Agents (e.g., BFS, TG, AOTGA)"""
+
+    code = models.CharField(max_length=10, unique=True, help_text="Short code (e.g., BFS, TGGS)")
+    name = models.CharField(max_length=100)
+    contact_email = models.EmailField(blank=True, null=True)
+    contact_phone = models.CharField(max_length=50, blank=True, null=True)
+
+    # Simple flags for capabilities
+    provides_passenger = models.BooleanField(default=True, help_text="Check-in, Gate, Boarding")
+    provides_ramp = models.BooleanField(default=True, help_text="Baggage, Pushback, Cleaning")
+    provides_cargo = models.BooleanField(default=False)
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["code"]
+        verbose_name = "Ground Handler"
+        verbose_name_plural = "Ground Handlers"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+# Update existing Airline model to include a handler
+# NOTE: Add this field to your EXISTING Airline class
+# ground_handler = models.ForeignKey(GroundHandler, on_delete=models.SET_NULL, null=True, blank=True, related_name="airlines")
