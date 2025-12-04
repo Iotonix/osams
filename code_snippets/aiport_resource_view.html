@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airport Resource Management System</title>
+
+    <!-- 1. External Dependencies (CDN) -->
+    <!-- Vis-Timeline CSS -->
+    <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet"
+        type="text/css" />
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            xcccccccccc
+        }
+
+        /* --- Timeline Container --- */
+        #visualization {
+            flex-grow: 1;
+            width: 100%;
+            border-top: 1px solid #dee2e6;
+            background-color: #ffffff;
+        }
+
+        /* --- VisJS Item Customization --- */
+        .vis-item {
+            border-color: transparent;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 11px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            display: flex;
+            /* alignment for content */
+            align-items: center;
+            padding-left: 5px;
+        }
+
+        /* Status Colors */
+        .vis-item.status-scheduled {
+            background-color: #3b82f6;
+            /* Blue-500 */
+            border-left: 4px solid #1e40af;
+            /* Blue-800 */
+        }
+
+        .vis-item.status-live {
+            background-color: #22c55e;
+            /* Green-500 */
+            border-left: 4px solid #14532d;
+            /* Green-900 */
+        }
+
+        .vis-item.status-cancelled {
+            background-color: #ef4444;
+            /* Red-500 */
+            border-left: 4px solid #7f1d1d;
+            /* Red-900 */
+            background-image: repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 5px,
+                    rgba(255, 255, 255, 0.2) 5px,
+                    rgba(255, 255, 255, 0.2) 10px);
+        }
+
+        /* Selected State */
+        .vis-item.vis-selected {
+            background-color: #fff !important;
+            color: #333 !important;
+            border: 2px solid #6366f1 !important;
+            z-index: 1000;
+            font-weight: bold;
+        }
+
+        /* Group (Row) Styling */
+        .vis-label.vis-nested-group {
+            background-color: #f1f5f9;
+        }
+
+        .vis-label {
+            color: #1e293b;
+            font-size: 13px;
+        }
+
+        .group-terminal {
+            background-color: #e2e8f0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+        }
+
+        .group-apron {
+            background-color: #fff7ed;
+            /* Orange tint */
+            font-weight: 800;
+            color: #9a3412;
+        }
+
+        /* Grid Lines */
+        .vis-time-axis .vis-grid.vis-minor {
+            border-color: #f1f5f9;
+        }
+
+        .vis-time-axis .vis-grid.vis-major {
+            border-color: #e2e8f0;
+        }
+
+        /* Sidebar Polish */
+        .offcanvas-header {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 1. Header Area -->
+    <header class="bg-white border-b px-4 py-3 d-flex justify-content-between align-items-center shadow-sm"
+        style="height: 60px;">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary text-white p-2 rounded">
+                <i class="bi bi-airplane-engines-fill"></i>
+            </div>
+            <div>
+                <h5 class="mb-0 fw-bold text-dark">OS-AMS Resource Manager</h5>
+                <small class="text-muted">Gantt View</small>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" onclick="timeline.fit()">
+                <i class="bi bi-arrows-fullscreen"></i> Fit All
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="refreshData()">
+                <i class="bi bi-arrow-clockwise"></i> Generate New Data
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. Legend Bar -->
+    <div class="bg-light border-bottom px-4 py-1 d-flex gap-4 text-xs small">
+        <div class="d-flex align-items-center gap-2">
+            <span style="width:12px; height:12px; background:#3b82f6; border-radius:2px;"></span> Scheduled
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span style="width:12px; height:12px; background:#22c55e; border-radius:2px;"></span> Live/Active
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span style="width:12px; height:12px; background:#ef4444; border-radius:2px;"></span> Cancelled
+        </div>
+        <div class="ms-auto text-muted fst-italic">
+            <i class="bi bi-mouse"></i> Drag to move assignments • Click for details
+        </div>
+    </div>
+
+    <!-- 3. Main Timeline Container -->
+    <div id="visualization"></div>
+
+    <!-- 4. Right Sidebar (Details Panel) -->
+    <div class="offcanvas offcanvas-end shadow" tabindex="-1" id="flightDetailsSidebar" aria-labelledby="sidebarLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="sidebarLabel"><i class="bi bi-info-circle me-2"></i>Flight Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+
+            <!-- Flight Header Card -->
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body text-center">
+                    <h1 id="oc_flight_no" class="display-6 fw-bold mb-0 text-primary">---</h1>
+                    <span id="oc_status" class="badge bg-secondary mt-2 px-3 py-2 rounded-pill">Unknown</span>
+                </div>
+            </div>
+
+            <!-- Detailed Specs -->
+            <h6 class="text-uppercase text-muted small fw-bold mb-3 ps-2 border-start border-4 border-primary">
+                Operational Data</h6>
+
+            <div class="list-group list-group-flush mb-4">
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                    <span class="text-muted"><i class="bi bi-geo-alt me-2"></i>Route</span>
+                    <span id="oc_route" class="fw-bold text-dark">---</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                    <span class="text-muted"><i class="bi bi-airplane me-2"></i>Registration</span>
+                    <span id="oc_reg" class="font-monospace bg-white border px-2 py-1 rounded">---</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                    <span class="text-muted"><i class="bi bi-box-arrow-in-down-right me-2"></i>Resource</span>
+                    <span id="oc_resource" class="fw-bold text-primary">---</span>
+                </div>
+            </div>
+
+            <h6 class="text-uppercase text-muted small fw-bold mb-3 ps-2 border-start border-4 border-warning">Timing
+                (Local)</h6>
+
+            <div class="row g-2 mb-5">
+                <div class="col-6">
+                    <div class="p-3 border rounded text-center bg-white">
+                        <div class="small text-muted mb-1">Sched. Arrival</div>
+                        <div id="oc_start" class="fs-5 fw-bold font-monospace">--:--</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-3 border rounded text-center bg-white">
+                        <div class="small text-muted mb-1">Sched. Departure</div>
+                        <div id="oc_end" class="fs-5 fw-bold font-monospace">--:--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-danger" onclick="alert('Simulation: Flight Unassigned')">
+                    <i class="bi bi-x-circle me-2"></i>Unassign Flight
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- 1. Global Variables ---
+        let timeline;
+        let itemsDataSet;
+        let groupsDataSet;
+
+        // --- 2. Mock Data Generator (Replaces Python Logic) ---
+        function generateMockData() {
+            console.log("Generating fresh mock data...");
+
+            // A. Define Master Data (Resources)
+            // Structure: Groups with nesting
+            const groups = [
+                // Terminal 1 Parent
+                { id: 'term_1', content: 'Terminal 1', treeLevel: 1, nestedGroups: ['gate_1', 'gate_2', 'gate_3', 'gate_4', 'gate_5'], showNested: true, className: 'group-terminal' },
+
+                // Gates (Children of T1)
+                { id: 'gate_1', content: '<span class="fw-bold">A1</span> <small class="text-muted ms-1">(Contact)</small>', treeLevel: 2 },
+                { id: 'gate_2', content: '<span class="fw-bold">A2</span> <small class="text-muted ms-1">(Contact)</small>', treeLevel: 2 },
+                { id: 'gate_3', content: '<span class="fw-bold">A3</span> <small class="text-muted ms-1">(Contact)</small>', treeLevel: 2 },
+                { id: 'gate_4', content: '<span class="fw-bold">R1</span> <small class="text-muted ms-1">(Remote)</small>', treeLevel: 2 },
+                { id: 'gate_5', content: '<span class="fw-bold">R2</span> <small class="text-muted ms-1">(Remote)</small>', treeLevel: 2 },
+
+                // Apron Parent
+                { id: 'apron', content: 'Apron Stands', treeLevel: 1, nestedGroups: ['stand_101', 'stand_102'], showNested: true, className: 'group-apron' },
+
+                // Stands (Children of Apron)
+                { id: 'stand_101', content: 'Stand 101', treeLevel: 2 },
+                { id: 'stand_102', content: 'Stand 102', treeLevel: 2 },
+            ];
+
+            // B. Generate 20 Random Flights
+            const items = [];
+            const airlines = ['BA', 'LH', 'AF', 'EK', 'QR', 'DL', 'UA'];
+            const statuses = ['SCH', 'LND', 'ONB', 'CNX', 'AIR'];
+            const resourceIds = ['gate_1', 'gate_2', 'gate_3', 'gate_4', 'gate_5', 'stand_101', 'stand_102'];
+
+            // Base time: Today at 06:00
+            let baseTime = new Date();
+            baseTime.setHours(6, 0, 0, 0);
+
+            for (let i = 1; i <= 20; i++) {
+                // Random Attributes
+                const airline = airlines[Math.floor(Math.random() * airlines.length)];
+                const flightNum = Math.floor(Math.random() * 899) + 100; // 100-999
+                const fullFlightNo = `${airline}${flightNum}`;
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                const resource = resourceIds[Math.floor(Math.random() * resourceIds.length)];
+                const reg = `${airline}-X${Math.floor(Math.random() * 90) + 10}`;
+
+                // Random Times (spread over 12 hours)
+                const startOffsetMins = Math.floor(Math.random() * 720);
+                const durationMins = Math.floor(Math.random() * 120) + 45; // 45m to 2h45m
+
+                const startDt = new Date(baseTime.getTime() + startOffsetMins * 60000);
+                const endDt = new Date(startDt.getTime() + durationMins * 60000);
+
+                // Style Logic
+                let cssClass = 'status-scheduled';
+                if (['LND', 'ONB', 'AIR'].includes(status)) cssClass = 'status-live';
+                if (status === 'CNX') cssClass = 'status-cancelled';
+
+                // Format Times for display
+                const fmtTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // Create Item
+                items.push({
+                    id: i,
+                    group: resource,
+                    start: startDt,
+                    end: endDt,
+                    content: `<strong>${fullFlightNo}</strong>`, // HTML content inside bar
+                    title: `${fullFlightNo} (${status})`, // Tooltip
+                    className: cssClass,
+                    type: 'range',
+                    // Custom data payload for the sidebar
+                    flight_details: {
+                        flight_no: fullFlightNo,
+                        route: (i % 2 === 0) ? 'LHR - JFK' : 'DXB - SIN',
+                        registration: reg,
+                        status: status,
+                        sched_start: fmtTime(startDt),
+                        sched_end: fmtTime(endDt)
+                    }
+                });
+            }
+
+            return { groups, items };
+        }
+
+        // --- 3. Initialization ---
+        function initTimeline() {
+            const container = document.getElementById('visualization');
+
+            // Timeline Config
+            const options = {
+                orientation: 'top',
+                stack: true,           // Avoid overlaps automatically
+                stackSubgroups: true,  // Important for nested groups
+                verticalScroll: true,
+                zoomKey: 'ctrlKey',    // Hold ctrl to zoom
+                maxHeight: '100%',
+                minHeight: '100%',
+                start: new Date().setHours(5, 0, 0, 0), // Viewport start
+                end: new Date().setHours(19, 0, 0, 0),  // Viewport end
+                editable: {
+                    updateTime: true,  // Drag horizontal
+                    updateGroup: true, // Drag vertical
+                    remove: false
+                },
+                margin: {
+                    item: 5, // Spacing
+                    axis: 5
+                },
+                // Snap to 5 minutes
+                snap: function (date, scale, step) {
+                    var minute = 5 * 60 * 1000;
+                    return Math.round(date / minute) * minute;
+                },
+                onMove: function (item, callback) {
+                    // Logic when item is dropped
+                    console.log(`Flight ${item.flight_details.flight_no} moved to ${item.group} at ${item.start}`);
+                    // Update the sidebar internal data if it's currently open?
+                    // For now just confirm the move:
+                    callback(item);
+                }
+            };
+
+            // Create DataSets (VisJS observable arrays)
+            groupsDataSet = new vis.DataSet([]);
+            itemsDataSet = new vis.DataSet([]);
+
+            // Create Timeline
+            timeline = new vis.Timeline(container, itemsDataSet, groupsDataSet, options);
+
+            // Add Event Listeners
+            timeline.on('select', function (properties) {
+                if (properties.items.length > 0) {
+                    const selectedId = properties.items[0];
+                    const item = itemsDataSet.get(selectedId);
+                    openSidebar(item);
+                }
+            });
+
+            // Initial Data Load
+            refreshData();
+        }
+
+        // --- 4. Logic Functions ---
+
+        function refreshData() {
+            const data = generateMockData();
+
+            // Update VisJS DataSets
+            groupsDataSet.clear();
+            itemsDataSet.clear();
+
+            groupsDataSet.add(data.groups);
+            itemsDataSet.add(data.items);
+
+            timeline.fit(); // Zoom to fit new data
+        }
+
+        function openSidebar(item) {
+            const details = item.flight_details;
+            if (!details) return;
+
+            // DOM Elements
+            const els = {
+                no: document.getElementById('oc_flight_no'),
+                route: document.getElementById('oc_route'),
+                reg: document.getElementById('oc_reg'),
+                res: document.getElementById('oc_resource'),
+                start: document.getElementById('oc_start'),
+                end: document.getElementById('oc_end'),
+                status: document.getElementById('oc_status')
+            };
+
+            // Populate Text
+            els.no.textContent = details.flight_no;
+            els.route.textContent = details.route;
+            els.reg.textContent = details.registration;
+            els.res.textContent = item.group.replace('_', ' ').toUpperCase(); // Simple formatting
+            els.start.textContent = details.sched_start;
+            els.end.textContent = details.sched_end;
+
+            // Status Styling
+            els.status.textContent = details.status;
+            els.status.className = 'badge rounded-pill px-3 py-2 mt-2 '; // reset base classes
+
+            if (['LND', 'ONB', 'AIR'].includes(details.status)) {
+                els.status.classList.add('bg-success');
+            } else if (details.status === 'CNX') {
+                els.status.classList.add('bg-danger');
+            } else {
+                els.status.classList.add('bg-primary');
+            }
+
+            // Show Bootstrap Offcanvas
+            const bsOffcanvas = new bootstrap.Offcanvas(document.getElementById('flightDetailsSidebar'));
+            bsOffcanvas.show();
+        }
+
+        // Start
+        document.addEventListener("DOMContentLoaded", initTimeline);
+
+    </script>
+</body>
+
+</html>
