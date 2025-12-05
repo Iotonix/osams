@@ -17,16 +17,16 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write("Starting Aviation Data Seed...")
 
-        # # 1. SEED AIRLINES
-        # self.seed_airlines()
+        # 1. SEED AIRLINES
+        self.seed_airlines()
 
-        # # 2. SEED AIRCRAFT
-        # self.seed_aircraft()
+        # 2. SEED AIRCRAFT
+        self.seed_aircraft()
 
-        # # 3. SEED AIRPORTS (New)
-        # self.seed_airports()
+        # 3. SEED AIRPORTS
+        self.seed_airports()
 
-        # 4. SEED ROUTES
+        # 4. SEED ROUTES (depends on airlines and airports being seeded first)
         self.seed_routes()
 
         self.stdout.write(self.style.SUCCESS("Data seeding completed successfully!"))

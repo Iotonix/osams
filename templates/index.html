@@ -20,8 +20,16 @@
                     <span class="badge bg-primary bg-opacity-10 text-primary"><i class="bi bi-airplane-fill"></i>
                         Today</span>
                 </div>
-                <h2 class="card-title mb-0">142</h2>
-                <small class="text-success"><i class="bi bi-arrow-up"></i> 5% vs yesterday</small>
+                <h2 class="card-title mb-0">{{ flights_today }}</h2>
+                {% if flights_change_direction == "up" %}
+                <small class="text-success"><i class="bi bi-arrow-up"></i> {{ flights_change_pct|floatformat:1 }}% vs
+                    yesterday</small>
+                {% elif flights_change_direction == "down" %}
+                <small class="text-danger"><i class="bi bi-arrow-down"></i> {{ flights_change_pct|floatformat:1 }}% vs
+                    yesterday</small>
+                {% else %}
+                <small class="text-muted">No change vs yesterday</small>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -59,7 +67,8 @@
                     <span class="badge bg-info bg-opacity-10 text-info"><i class="bi bi-people-fill"></i> Hour</span>
                 </div>
                 <h2 class="card-title mb-0">{{ pax_throughput_hourly }}</h2>
-                <small class="text-muted">Based on {{ occupied_gates }} active gates, 100 pax per gate per hour ({{ occupied_gates }} / {{ gate_count }} gates in use).</small>
+                <small class="text-muted">Based on {{ occupied_gates }} active gates, 100 pax per gate per hour ({{
+                    occupied_gates }} / {{ gate_count }} gates in use).</small>
             </div>
         </div>
     </div>
