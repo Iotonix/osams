@@ -36,6 +36,9 @@ class SeasonalFlightForm(BootstrapFormMixin, forms.ModelForm):
             "start_date",
             "end_date",
             "days_of_operation",
+            "preferred_gate",
+            "preferred_stand",
+            "preferred_carousel",
             "is_active",
         ]
         widgets = {

@@ -124,6 +124,7 @@ class Gate(models.Model):
     code = models.CharField(max_length=10, unique=True, help_text="Gate code (e.g., A1, B12, C3)")
     terminal = models.ForeignKey(Terminal, on_delete=models.CASCADE, related_name="gates")
     gate_type = models.CharField(max_length=10, choices=GATE_TYPE_CHOICES, default="CONTACT")
+    stand = models.ForeignKey("Stand", on_delete=models.PROTECT, related_name="gate", null=True, blank=True, help_text="Physical stand/parking position for this gate")
     allowed_aircraft_types = models.ManyToManyField(AircraftType, blank=True, help_text="Restrict gate to specific aircraft types (leave empty for all)")
     max_wingspan_meters = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Maximum wingspan restriction")
     is_active = models.BooleanField(default=True)

@@ -22,11 +22,8 @@
                     <span class="input-group-text bg-light border-end-0">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" 
-                           class="form-control border-start-0" 
-                           name="search" 
-                           value="{{ search_query }}" 
-                           placeholder="Search by airline, flight number, or airports...">
+                    <input type="text" class="form-control border-start-0" name="search" value="{{ search_query }}"
+                        placeholder="Search by airline, flight number, or airports...">
                 </div>
             </div>
             <div class="col-md-2">
@@ -55,6 +52,7 @@
                             <th>Flight</th>
                             <th>Route</th>
                             <th>Aircraft</th>
+                            <th>Resources</th>
                             <th>Times (UTC)</th>
                             <th>Validity</th>
                             <th>Days</th>
@@ -68,12 +66,25 @@
                                 <span class="badge bg-primary">{{ flight.airline.iata_code }}{{ flight.flight_number }}</span>
                             </td>
                             <td>
-                                <strong>{{ flight.origin.iata_code }}</strong> 
-                                <i class="bi bi-arrow-right mx-1"></i> 
+                                <strong>{{ flight.origin.iata_code }}</strong>
+                                <i class="bi bi-arrow-right mx-1"></i>
                                 <strong>{{ flight.destination.iata_code }}</strong>
                             </td>
                             <td>
                                 <span class="badge bg-secondary">{{ flight.aircraft_type.icao_code }}</span>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {% if flight.preferred_gate %}<i class="bi bi-door-open"></i> {{
+                                    flight.preferred_gate.code }}<br>{% endif %}
+                                    {% if flight.preferred_stand %}<i class="bi bi-p-square"></i> {{
+                                    flight.preferred_stand.code }}<br>{% endif %}
+                                    {% if flight.preferred_carousel %}<i class="bi bi-arrow-clockwise"></i> {{
+                                    flight.preferred_carousel.code }}{% endif %}
+                                    {% if not flight.preferred_gate and not flight.preferred_stand and not
+                                    flight.preferred_carousel %}<span class="text-warning">Not assigned</span>{% endif
+                                    %}
+                                </small>
                             </td>
                             <td>
                                 <small class="text-muted">
@@ -92,15 +103,14 @@
                             </td>
                             <td class="text-center">
                                 <a href="{% url 'schedules:edit_seasonal_flight' flight.pk %}"
-                                   class="btn btn-sm btn-light"
-                                   title="Edit">
+                                    class="btn btn-sm btn-light" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form method="post" action="{% url 'schedules:delete_seasonal_flight' flight.pk %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ flight.airline.iata_code }}{{ flight.flight_number }}?');">
+                                <form method="post" action="{% url 'schedules:delete_seasonal_flight' flight.pk %}"
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete {{ flight.airline.iata_code }}{{ flight.flight_number }}?');">
                                     {% csrf_token %}
-                                    <button type="submit"
-                                            class="btn btn-sm btn-light text-danger"
-                                            title="Delete">
+                                    <button type="submit" class="btn btn-sm btn-light text-danger" title="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -108,7 +118,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox display-4 d-block mb-3"></i>
                                 No seasonal flights found
                             </td>

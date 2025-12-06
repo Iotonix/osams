@@ -111,6 +111,11 @@ class Command(BaseCommand):
                     if schedule.stoa < schedule.stod:
                         stoa = timezone.make_aware(datetime.combine(current_date + timedelta(days=1), schedule.stoa))
 
+                    # Validate preferred resources and assign or set to None
+                    assigned_gate = self._validate_and_assign_gate(schedule, flight_id)
+                    assigned_stand = self._validate_and_assign_stand(schedule, flight_id)
+                    assigned_carousel = schedule.preferred_carousel  # Carousel doesn't need aircraft compatibility check
+
                     if dry_run:
                         self.stdout.write(
                             f"   [DRY RUN] Would create: {flight_id} - "
@@ -133,6 +138,9 @@ class Command(BaseCommand):
                                     "status": "SCH",
                                     "stod": stod,
                                     "stoa": stoa,
+                                    "gate": assigned_gate,
+                                    "stand": assigned_stand,
+                                    "carousel": assigned_carousel,
                                     "is_manually_modified": False,
                                     "schedule_version": 1,
                                     "last_propagated_at": timezone.now(),
@@ -182,3 +190,65 @@ class Command(BaseCommand):
             self.stdout.write(f"   Total daily flights in period: {total_daily}")
             self.stdout.write(f"   Manually modified flights: {manual_count}")
             self.stdout.write(f"   Auto-propagatable flights: {total_daily - manual_count}\n")
+
+    def _validate_and_assign_gate(self, schedule, flight_id):
+        """
+        Validate preferred_gate against aircraft compatibility.
+        Returns the gate if valid, None if invalid or not set.
+        Logs warnings for invalid assignments per Q12 answer.
+        """
+        if not schedule.preferred_gate:
+            return None
+
+        gate = schedule.preferred_gate
+        aircraft = schedule.aircraft_type
+
+        # Check 1: Allowed aircraft types (if gate restricts)
+        allowed_types = gate.allowed_aircraft_types.all()
+        if allowed_types.exists():
+            if aircraft not in allowed_types:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"   ⚠ {flight_id}: Preferred Gate {gate.code} does not allow {aircraft.icao_code}. Left unassigned."
+                    )
+                )
+                return None
+
+        # Check 2: Wingspan restriction
+        if gate.max_wingspan_meters:
+            if aircraft.wingspan_meters > gate.max_wingspan_meters:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"   ⚠ {flight_id}: Aircraft wingspan ({aircraft.wingspan_meters}m) exceeds "
+                        f"Gate {gate.code} maximum ({gate.max_wingspan_meters}m). Left unassigned."
+                    )
+                )
+                return None
+
+        # All checks passed
+        return gate
+
+    def _validate_and_assign_stand(self, schedule, flight_id):
+        """
+        Validate preferred_stand against aircraft compatibility.
+        Returns the stand if valid, None if invalid or not set.
+        """
+        if not schedule.preferred_stand:
+            return None
+
+        stand = schedule.preferred_stand
+        aircraft = schedule.aircraft_type
+
+        # Check wingspan restriction
+        if stand.max_wingspan_meters:
+            if aircraft.wingspan_meters > stand.max_wingspan_meters:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"   ⚠ {flight_id}: Aircraft wingspan ({aircraft.wingspan_meters}m) exceeds "
+                        f"Stand {stand.code} maximum ({stand.max_wingspan_meters}m). Left unassigned."
+                    )
+                )
+                return None
+
+        # All checks passed
+        return stand

@@ -1,88 +1,109 @@
-# **Task: Implement Resource Allocation Timeline (Vis.js) in new Django App**
+# **OS-AMS Gate Allocation Strategy**
 
-**Context:**
-We are building an Open Source Airport Management System (OS-AMS) using **Django 5** and **Bootstrap 5**.
-We are creating a new app called **`resource_mgmt`** to handle resource visualization using the **Vis.js Timeline** library.
+This document outlines the conceptual framework for managing Airport Resources (Gates, Stands, Check-in Counters) across both Seasonal Planning and Daily Operations.
 
-**Goal:**
-Generate the complete code for the `resource_mgmt` app to display a "Daily Operations Timeline" where flight bars are shown on Gate, Stand, and Check-in rows.
+## **1\. The Core Concept: "Default vs. Actual"**
 
-## **1. Data Model Context (Read-Only)**
+To streamline daily operations, OS-AMS adopts a **Pre-Allocation Strategy**. Instead of starting every day with a blank slate (0% allocated), we aim to start with a \~80% complete plan based on seasonal agreements.
 
-You will need to query these existing models. Do not modify them, just import and use them.
+### **A. Seasonal Allocation (The "Default")**
 
-* **`masterdata.models`**:
-  * `Terminal` (Fields: `id`, `code`, `name`) - Parent container.
-  * `Gate` (Fields: `id`, `code`, `terminal_id`) - Linked to Terminal.
-  * `Stand` (Fields: `id`, `code`) - Remote parking (no terminal link usually).
-  * `CheckInCounter` (Fields: `id`, `code`, `terminal_id`, `counter_group`) - Linked to Terminal. `counter_group` is a string like "Row A".
-* **`flight_ops.models`**:
-  * `DailyFlight` (The items to display)
-    * `flight_id` (String), `airline` (FK), `flight_number` (String), `registration` (String).
-    * `status` (Choices: SCH, OFB, AIR, LND, ONB, FIB, LSB, CXX, DIV).
-    * **Timings:** `stod` (Sched Dep), `atod` (Actual Dep), `stoa` (Sched Arr), `aibt` (Actual Block In).
-    * **Resources:** `gate` (FK to Gate), `stand` (FK to Stand), `checkin_counters` (ManyToManyField to CheckInCounter).
+* **Context:** Airlines negotiate slot usage and often request specific infrastructure (e.g., "British Airways always uses Gate A1").  
+* **Mechanism:** We store preferred\_gate and preferred\_stand on the SeasonalFlight template.  
+* **Validation:** At this stage, we validate **Static Constraints** only.  
+  * *Is the gate large enough for this aircraft type?*  
+  * *Is the gate in the correct terminal?*
 
-## **2. Implementation Requirements**
+### **B. Daily Allocation (The "Actual")**
 
-Please generate the code for the following three files:
+* **Context:** The day of operation involves delays, weather, and maintenance.  
+* **Mechanism:** The DailyFlight record has gate and stand fields.  
+* **Initialization:** When the nightly generate\_daily\_flights command runs, it copies the *Seasonal Preferred Gate* \-\> *Daily Actual Gate*.  
+* **Validation:** At this stage, we validate **Dynamic Constraints**.  
+  * *Is the gate already occupied by a delayed flight?*  
+  * *Is the gate under maintenance today?*
 
-### **File 1: `resource_mgmt/urls.py`**
+## **2\. Constraints & Compatibility Logic**
 
-* Define `app_name = 'resource_mgmt'`.
-* Add two paths:
-    1. `timeline/` -> `views.timeline_view` (The HTML page).
-    2. `api/timeline-data/` -> `views.timeline_data` (The JSON endpoint).
+Airlines cannot simply choose any gate. The system must enforce compatibility rules defined in masterdata.
 
-### **File 2: `resource_mgmt/views.py`**
+### **Hard Constraints (Must Pass)**
 
-**A. `timeline_view(request)`**:
+These checks prevent illegal assignments that would cause safety hazards or physical blocks.
 
-* Simply render `resource_mgmt/timeline.html`.
-* Pass the current date as a string context variable `today` (format YYYY-MM-DD).
+1. **Aircraft Compatibility (Many-to-Many):**  
+   * **Rule:** DailyFlight.aircraft\_type **MUST** be in Gate.allowed\_aircraft\_types.  
+   * *Example:* An A380 cannot be assigned to a Code C (A320/B737) gate.  
+2. **Wingspan Restriction:**  
+   * **Rule:** AircraftType.wingspan\_meters **MUST** be \<= Gate.max\_wingspan\_meters.  
+3. **Terminal Matching:**  
+   * **Rule:** Ideally, Gate.terminal should match the flight's operational handling area, though exceptions exist (bussing).
 
-**B. `timeline_data(request)`**:
+## **3\. Implementation Plan**
 
-* **Input:** Accept a GET parameter `date` (default to today).
-* **Output:** Return a `JsonResponse` with `{ "groups": [...], "items": [...] }`.
+### **Phase 1: Data Model Updates (schedules App)**
 
-**Logic for `groups` (The Y-Axis):**
+We need to enhance the SeasonalFlight model to store these preferences.
 
-1. **Unassigned Group:** Create a group ID `"unassigned"` at the very top for flights with no Gate/Stand.
-2. **Terminal Hierarchy:** Iterate through all active Terminals.
-    * Create a Level 1 group for the **Terminal** (id: `term_X`).
-    * **Gates:** Create Level 2 groups for all active **Gates** belonging to this terminal (id: `gate_X`). Parent is `term_X`.
-    * **Check-in Rows:** Group counters by their `counter_group` field (e.g., "Row A").
-        * Create Level 2 groups for these **Rows** (id: `row_X_Name`). Parent is `term_X`.
-        * Create Level 3 groups for the actual **Counters** (id: `cntr_X`). Parent is the Row group ID.
-3. **Stands:** Create a generic parent group "Apron/Stands" and put all **Stand** objects as children (id: `stand_X`).
+\# schedules/models.py
 
-**Logic for `items` (The Flights):**
+class SeasonalFlight(models.Model):  
+    \# ... existing fields ...  
+      
+    \# NEW: Seasonal Preferences  
+    preferred\_gate \= models.ForeignKey(  
+        "masterdata.Gate",   
+        null=True, blank=True,   
+        on\_delete=models.SET\_NULL,  
+        help\_text="The standard gate negotiated for this flight series."  
+    )  
+      
+    preferred\_stand \= models.ForeignKey(  
+        "masterdata.Stand",   
+        null=True, blank=True,   
+        on\_delete=models.SET\_NULL,  
+        help\_text="Parking position if gate is not available or for long layovers."  
+    )
 
-1. Query `DailyFlight` for the selected date. Use `select_related` and `prefetch_related` for performance.
-2. **Mapping Logic:**
-    * **Start Time:** Use `aibt` (Actual In-Block) if present, else `stoa`.
-    * **End Time:** Use `atod` (Actual Off-Block) if present, else `stod`.
-    * **Label:** `{airline_code}{flight_number}`.
-    * **Classes:** Add CSS class based on status (e.g., `item-sch`, `item-lnd`, `item-cxx`).
-3. **Item Creation (One flight might result in multiple items):**
-    * **Gate/Stand Item:** If `gate` is set, create item in group `gate_X`. If `stand` is set, create item in group `stand_X`. If neither, create item in group `"unassigned"`.
-    * **Check-in Items:** Iterate through `flight.checkin_counters.all()`. Create an item for *each* counter in group `cntr_X`. (Time logic: Check-in opens 3 hours before STD, closes 40 mins before STD).
+    def clean(self):  
+        \# Validation Logic (Pseudo-code)  
+        if self.preferred\_gate and self.aircraft\_type:  
+            \# 1\. Check Specific Allowed Types  
+            if self.preferred\_gate.allowed\_aircraft\_types.exists():  
+                if self.aircraft\_type not in self.preferred\_gate.allowed\_aircraft\_types.all():  
+                    raise ValidationError(f"{self.aircraft\_type} not allowed on Gate {self.preferred\_gate}")  
+              
+            \# 2\. Check Wingspan  
+            if self.preferred\_gate.max\_wingspan\_meters:  
+                if self.aircraft\_type.wingspan\_meters \> self.preferred\_gate.max\_wingspan\_meters:  
+                    raise ValidationError("Aircraft wingspan exceeds gate capacity")
 
-### **File 3: `templates/resource_mgmt/timeline.html`**
+### **Phase 2: Generation Logic Update (flight\_ops App)**
 
-* Extend `base.html`.
-* **Structure:**
-  * A toolbar with a Date Picker (`<input type="date">`) and a "Load" button.
-  * A container div `#visualization` for the timeline.
-* **Libraries:** Include Vis.js Timeline CSS/JS via CDN (unpkg).
-* **CSS:** Add custom styles in `{% block extra_css %}`:
-  * `group-terminal`: Dark grey background, bold white text.
-  * `group-row`: Light grey background, bold text.
-  * `item-sch` (Blue), `item-lnd` (Green), `item-cxx` (Red/Striped).
-  * `vis-item`: Small font size (11px).
-* **JavaScript (`{% block extra_js %}`):**
-  * Initialize `vis.Timeline`.
-  * **Config:** `stack: true`, `stackSubgroups: true`, `orientation: 'top'`, `verticalScroll: true`, `maxHeight: '800px'`.
-  * **AJAX:** Fetch data from the API when the Date Picker changes or "Load" is clicked.
-  * **Interaction:** Add an `onMove` callback that logs to console: "Moved flight [ID] to group [GroupID]" (placeholder for future save logic).
+Update the management command generate\_daily\_flights.py to copy these values.
+
+\# Inside the generation loop:  
+defaults={  
+    \# ... other fields ...  
+    "gate": schedule.preferred\_gate,   \# Copy from template  
+    "stand": schedule.preferred\_stand, \# Copy from template  
+    "is\_manually\_modified": False,  
+}
+
+### **Phase 3: Conflict Detection (Future resource\_mgmt App)**
+
+Assigning preferred\_gate seasonally creates a "Perfect World" plan. However, overlaps will occur (e.g., Flight A arrives late, blocking Flight B).
+
+We will need a **Conflict Detection Engine** that runs:
+
+1. **On Schedule Save:** Warn if the Seasonal Flight overlaps with another Seasonal Flight on the same gate (e.g., "Warning: TG920 overlaps with LH772 on Tuesdays").  
+2. **On Daily Operations:** Visual alerts on the Gantt chart (Red Blocks) when actual times overlap on the same resource.
+
+## **4\. Benefit Analysis**
+
+| Feature | Without Seasonal Allocation | With Seasonal Allocation |
+| :---- | :---- | :---- |
+| **Daily Workload** | High. Controllers must assign gates for 300+ flights every morning. | Low. 90% of flights are auto-assigned. Controllers only manage exceptions. |
+| **Consistency** | Low. Flight TG920 might be at A1 today, B5 tomorrow. | High. Passengers and Ground Crew learn that "TG920 is usually at A1". |
+| **Planning** | Hard to visualize capacity. | Easy. We can see if Terminal 1 is "full" months in advance. |
+
