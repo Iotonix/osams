@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+
+{% block title %}Seasonal Schedule GANTT - OS-AMS{% endblock %}
+
+{% block extra_css %}
+<!-- Vis-Timeline CSS -->
+<link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+
+<style>
+    /* Timeline Container */
+    #visualization {
+        width: 100%;
+        height: 700px;
+        border: 1px solid #dee2e6;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* VisJS Item Customization */
+    .vis-item {
+        border-color: transparent;
+        color: #1e3a5f;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 11px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        padding-left: 8px;
+        font-weight: 500;
+    }
+
+    /* Item Type Colors - Light blue backgrounds for seasonal (no status yet) */
+    .vis-item.item-gate {
+        background-color: #bfdbfe;
+        /* Light blue */
+        border-left: 4px solid #3b82f6;
+    }
+
+    .vis-item.item-carousel {
+        background-color: #ddd6fe;
+        /* Light purple */
+        border-left: 4px solid #8b5cf6;
+    }
+
+    /* Selected State */
+    .vis-item.vis-selected {
+        background-color: #fff !important;
+        color: #333 !important;
+        border: 2px solid #6366f1 !important;
+        z-index: 1000;
+        font-weight: bold;
+    }
+
+    /* Group (Row) Styling */
+    .vis-label {
+        color: #000000 !important;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+
+    /* Header groups (GATES & STANDS, BAGGAGE CAROUSELS) */
+    .vis-label.vis-nested-group.vis-group-level-0,
+    .vis-label.group-header {
+        background-color: #e5e7eb !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        border-bottom: 2px solid #9ca3af !important;
+    }
+
+    /* All nested level 2 groups (gates, stands, carousels) */
+    .vis-label.vis-nested-group.vis-group-level-2 {
+        color: #000000 !important;
+        font-size: 12px !important;
+        padding-left: 24px !important;
+        font-weight: 700 !important;
+    }
+
+    /* Gate/Stand resource rows - match gate item color EXACTLY */
+    .vis-label.vis-group-level-2.group-resource[id^="gate_"],
+    .vis-label.vis-group-level-2.group-resource[id^="stand_"],
+    .vis-label[data-resource-type="gate"] {
+        background-color: #bfdbfe !important;  /* Same as gate items */
+        border-bottom: 1px solid #93c5fd !important;
+    }
+
+    /* Carousel resource rows - match carousel item color EXACTLY */
+    .vis-label.vis-group-level-2.group-resource[id^="carousel_"],
+    .vis-label[data-resource-type="carousel"] {
+        background-color: #ddd6fe !important;  /* Same as carousel items */
+        border-bottom: 1px solid #c4b5fd !important;
+    }
+
+    /* Fallback for any resource groups with class */
+    .vis-label.group-resource {
+        background-color: #bfdbfe !important;
+        color: #000000 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+    }
+
+    /* Grid Lines */
+    .vis-time-axis .vis-grid.vis-minor {
+        border-color: #f1f5f9;
+    }
+
+    .vis-time-axis .vis-grid.vis-major {
+        border-color: #e2e8f0;
+    }
+
+    /* Filter Section */
+    .filter-card {
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Legend Items */
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 20px;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 12px;
+        border-radius: 3px;
+    }
+
+    /* Loading Spinner */
+    .spinner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        border-radius: 8px;
+    }
+
+    .spinner-overlay.active {
+        display: flex;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h4 mb-1">
+            <i class="bi bi-calendar3-week text-primary me-2"></i>Seasonal Schedule GANTT
+        </h2>
+        <p class="text-muted mb-0">Visual timeline of flight schedules and resource allocation</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'schedules:seasonal_flight_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-table me-1"></i>Table View
+        </a>
+        <button class="btn btn-outline-primary" onclick="timeline.fit()">
+            <i class="bi bi-arrows-fullscreen me-1"></i>Fit All
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-card">
+    <form id="filterForm" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label for="dayOfWeek" class="form-label fw-bold">
+                <i class="bi bi-calendar-week me-1"></i>Day of Week
+            </label>
+            <select class="form-select" id="dayOfWeek" name="day_of_week">
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+                <option value="7">Sunday</option>
+            </select>
+        </div>
+        
+        <div class="col-md-3">
+            <label for="airlineFilter" class="form-label fw-bold">
+                <i class="bi bi-building me-1"></i>Airline
+            </label>
+            <select class="form-select" id="airlineFilter" name="airline">
+                <option value="">All Airlines</option>
+                {% for airline in airlines %}
+                <option value="{{ airline.iata_code }}">{{ airline.iata_code }} - {{ airline.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="searchQuery" class="form-label fw-bold">
+                <i class="bi bi-search me-1"></i>Search
+            </label>
+            <input type="text" class="form-control" id="searchQuery" name="search" placeholder="Flight number, airport...">
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel me-1"></i>Apply Filters
+            </button>
+        </div>
+    </form>
+
+    <div class="mt-3 d-flex justify-content-between align-items-center">
+        <div>
+            <span class="text-muted small">Showing <strong id="flightCount">0</strong> flights on <strong id="selectedDay">Monday</strong></span>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+            <i class="bi bi-x-circle me-1"></i>Clear Filters
+        </button>
+    </div>
+</div>
+
+<!-- Legend -->
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-2">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+            <small class="text-muted fw-bold me-2">Resource Types:</small>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #3b82f6;"></span>
+                <small>Gate/Stand</small>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #8b5cf6;"></span>
+                <small>Baggage Carousel</small>
+            </div>
+            <div class="ms-auto text-muted small fst-italic">
+                <i class="bi bi-info-circle me-1"></i>
+                Click on flight rows to expand/collapse resource details
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Timeline Container -->
+<div class="position-relative">
+    <div id="visualization"></div>
+    <div id="loadingSpinner" class="spinner-overlay">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-2 text-muted">Loading timeline data...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Info Cards -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-primary">
+                    <i class="bi bi-info-circle me-2"></i>About This View
+                </h6>
+                <p class="card-text small text-muted mb-0">
+                    This GANTT chart displays a <strong>typical day</strong> view of seasonal flight schedules.
+                    Select a day of week to see which flights operate on that day. Gate/stand occupation is shown
+                    for 2 hours (arrivals from landing, departures ending at takeoff). Baggage carousels activate
+                    30 minutes after landing for 45 minutes.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title text-primary">
+                    <i class="bi bi-keyboard me-2"></i>Keyboard Shortcuts
+                </h6>
+                <ul class="list-unstyled small text-muted mb-0">
+                    <li><kbd>Ctrl</kbd> + Scroll: Zoom in/out</li>
+                    <li><kbd>Shift</kbd> + Drag: Pan timeline</li>
+                    <li>Click group header: Expand/collapse resources</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Vis-Timeline JS -->
+<script src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+
+<script>
+    let timeline;
+    let itemsDataSet;
+    let groupsDataSet;
+
+    // Initialize timeline on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        initTimeline();
+        loadTimelineData();
+    });
+
+    function initTimeline() {
+        const container = document.getElementById('visualization');
+
+        // Timeline configuration - show 24 hours for a typical day
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const options = {
+            orientation: 'top',
+            stack: true,
+            stackSubgroups: true,
+            verticalScroll: true,
+            zoomKey: 'ctrlKey',
+            maxHeight: '700px',
+            minHeight: '700px',
+            start: today,
+            end: tomorrow,
+            margin: {
+                item: 4,
+                axis: 5
+            },
+            groupOrder: 'id',
+            // Enable group ordering and nesting
+            groupOrderSwap: function(fromGroup, toGroup, groups) {
+                return false; // Disable reordering
+            }
+        };
+
+        // Create DataSets
+        groupsDataSet = new vis.DataSet([]);
+        itemsDataSet = new vis.DataSet([]);
+
+        // Create Timeline
+        timeline = new vis.Timeline(container, itemsDataSet, groupsDataSet, options);
+
+        // Add click listener for group expansion/collapse
+        timeline.on('click', function(properties) {
+            if (properties.group) {
+                const group = groupsDataSet.get(properties.group);
+                if (group && group.nestedGroups && group.nestedGroups.length > 0) {
+                    // Toggle nested groups visibility
+                    group.showNested = !group.showNested;
+                    
+                    // Update the group - use updateOnly to force change
+                    groupsDataSet.updateOnly(group);
+                    
+                    // Get all groups and set them again to force re-render
+                    const allGroups = groupsDataSet.get();
+                    timeline.setGroups(allGroups);
+                    
+                    console.log(`Toggled group ${group.id}, showNested: ${group.showNested}`);
+                }
+            }
+        });
+    }
+
+    function loadTimelineData() {
+        showLoading(true);
+
+        // Get filter parameters
+        const formData = new FormData(document.getElementById('filterForm'));
+        const params = new URLSearchParams(formData);
+
+        // Fetch data from API
+        fetch(`{% url 'schedules:seasonal_gantt_data' %}?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received data:', data);
+                
+                // Update DataSets
+                groupsDataSet.clear();
+                itemsDataSet.clear();
+
+                if (data.groups && data.groups.length > 0) {
+                    groupsDataSet.add(data.groups);
+                    console.log(`Added ${data.groups.length} groups`);
+                }
+                
+                if (data.items && data.items.length > 0) {
+                    itemsDataSet.add(data.items);
+                    console.log(`Added ${data.items.length} items`);
+                    console.log('Sample item:', data.items[0]);
+                    console.log('Sample item dates:', {
+                        start: new Date(data.items[0].start),
+                        end: new Date(data.items[0].end)
+                    });
+                    
+                    // Check what's actually in the dataset
+                    setTimeout(() => {
+                        console.log('Items in dataset:', itemsDataSet.length);
+                        console.log('Groups in dataset:', groupsDataSet.length);
+                        console.log('First item from dataset:', itemsDataSet.get(1));
+                        console.log('Timeline items:', timeline.itemsData.length);
+                        
+                        // Force redraw
+                        timeline.redraw();
+                        
+                        // Check DOM
+                        const visItems = document.querySelectorAll('.vis-item');
+                        console.log('vis-item elements in DOM:', visItems.length);
+                        if (visItems.length > 0) {
+                            console.log('First vis-item:', visItems[0]);
+                            console.log('First vis-item innerHTML:', visItems[0].innerHTML);
+                            console.log('First vis-item style attribute:', visItems[0].getAttribute('style'));
+                            console.log('First vis-item computed style:', {
+                                display: window.getComputedStyle(visItems[0]).display,
+                                visibility: window.getComputedStyle(visItems[0]).visibility,
+                                width: window.getComputedStyle(visItems[0]).width,
+                                height: window.getComputedStyle(visItems[0]).height,
+                                left: window.getComputedStyle(visItems[0]).left,
+                                top: window.getComputedStyle(visItems[0]).top,
+                            });
+                        } else {
+                            console.error('NO vis-item elements found in DOM!');
+                            console.log('Looking for vis-center...');
+                            const visCenter = document.querySelector('.vis-center');
+                            if (visCenter) {
+                                console.log('vis-center found, innerHTML sample:', visCenter.innerHTML.substring(0, 500));
+                            }
+                        }
+                    }, 100);
+                }
+
+                // Update flight count and selected day
+                document.getElementById('flightCount').textContent = data.count || 0;
+                
+                const dayNames = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                const selectedDayNum = document.getElementById('dayOfWeek').value;
+                document.getElementById('selectedDay').textContent = dayNames[selectedDayNum] || 'Monday';
+
+                // Fit timeline to show all data
+                if (data.items && data.items.length > 0) {
+                    // Don't use fit() for a 24-hour view, keep the day range
+                    // timeline.fit();
+                    console.log('Timeline window:', {
+                        start: timeline.getWindow().start,
+                        end: timeline.getWindow().end
+                    });
+                } else {
+                    console.warn('No items to display');
+                }
+
+                showLoading(false);
+            })
+            .catch(error => {
+                console.error('Error loading timeline data:', error);
+                showLoading(false);
+                alert('Error loading timeline data. Please try again.');
+            });
+    }
+
+    function showLoading(show) {
+        const spinner = document.getElementById('loadingSpinner');
+        if (show) {
+            spinner.classList.add('active');
+        } else {
+            spinner.classList.remove('active');
+        }
+    }
+
+    function clearFilters() {
+        document.getElementById('filterForm').reset();
+        loadTimelineData();
+    }
+
+    // Handle filter form submission
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        loadTimelineData();
+    });
+</script>
+{% endblock %}

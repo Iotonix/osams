@@ -8,9 +8,14 @@
         <h2 class="h4 mb-1">Seasonal Flights</h2>
         <p class="text-muted">Flight schedules and recurring operations</p>
     </div>
-    <a href="{% url 'schedules:add_seasonal_flight' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-2"></i>Add Seasonal Flight
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{% url 'schedules:seasonal_gantt' %}" class="btn btn-outline-primary">
+            <i class="bi bi-calendar3-week me-2"></i>GANTT View
+        </a>
+        <a href="{% url 'schedules:add_seasonal_flight' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Add Seasonal Flight
+        </a>
+    </div>
 </div>
 
 <!-- Search Bar -->
@@ -75,15 +80,10 @@
                             </td>
                             <td>
                                 <small class="text-muted">
-                                    {% if flight.preferred_gate %}<i class="bi bi-door-open"></i> {{
-                                    flight.preferred_gate.code }}<br>{% endif %}
-                                    {% if flight.preferred_stand %}<i class="bi bi-p-square"></i> {{
-                                    flight.preferred_stand.code }}<br>{% endif %}
-                                    {% if flight.preferred_carousel %}<i class="bi bi-arrow-clockwise"></i> {{
-                                    flight.preferred_carousel.code }}{% endif %}
-                                    {% if not flight.preferred_gate and not flight.preferred_stand and not
-                                    flight.preferred_carousel %}<span class="text-warning">Not assigned</span>{% endif
-                                    %}
+                                    {% if flight.preferred_gate %}<i class="bi bi-door-open"></i> {{ flight.preferred_gate.code }}<br>{% endif %}
+                                    {% if flight.preferred_stand %}<i class="bi bi-p-square"></i> {{ flight.preferred_stand.code }}<br>{% endif %}
+                                    {% if flight.preferred_carousel %}<i class="bi bi-arrow-clockwise"></i> {{ flight.preferred_carousel.code }}{% endif %}
+                                    {% if not flight.preferred_gate and not flight.preferred_stand and not flight.preferred_carousel %}<span class="text-warning">Not assigned</span>{% endif%}
                                 </small>
                             </td>
                             <td>

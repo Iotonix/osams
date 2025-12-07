@@ -11,9 +11,9 @@
 | Version | Codename | Release Date | Key Focus Areas |
 | :---- | :---- | :---- | :---- |
 | **[v0.4](https://www.google.com/search?q=0.4_basic_resource_planning.md)** | **Allocation** | *Current* | Resource Allocation Algorithms, Vis.js Timeline, Gate-Stand Linking |
-| [**v0.3**](https://www.google.com/search?q=0.3_flight_planning.md) | **Rotation** | *29-11-2025* | Flight Ops Engine, Rolling Window Strategy, Schedule Management |
-| [**v0.2**](https://www.google.com/search?q=0.2_aviation_data.md) | **Tarmac** | *22-11=2025* | Airport Infrastructure (Runways, Terminals), Dashboard v1 |
-| [**v0.1**](https://www.google.com/search?q=0.1_init_and_masterdata.md) | **Takeoff** | *15-11-2025* | Architecture Setup, Docker, Auth, Core Master Data |
+| [**v0.3**](https://www.google.com/search?q=0.3_flight_planning.md) | **Rotation** | *7 Days Ago* | Flight Ops Engine, Rolling Window Strategy, Schedule Management |
+| [**v0.2**](https://www.google.com/search?q=0.2_aviation_data.md) | **Tarmac** | *1 Week Ago* | Airport Infrastructure (Runways, Terminals), Dashboard v1 |
+| [**v0.1**](https://www.google.com/search?q=0.1_init_and_masterdata.md) | **Takeoff** | *2 Weeks Ago* | Architecture Setup, Docker, Auth, Core Master Data |
 
 ## **📈  Roadmap Preview (v0.5)**
 

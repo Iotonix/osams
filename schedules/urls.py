@@ -5,6 +5,8 @@ from .views import (
     delete_seasonal_flight,
     edit_seasonal_flight,
     seasonal_flight_list,
+    seasonal_gantt_view,
+    seasonal_gantt_data,
 )
 
 app_name = "schedules"
@@ -15,4 +17,6 @@ urlpatterns = [
     path("seasonal-flights/add/", add_seasonal_flight, name="add_seasonal_flight"),
     path("seasonal-flights/<int:pk>/edit/", edit_seasonal_flight, name="edit_seasonal_flight"),
     path("seasonal-flights/<int:pk>/delete/", delete_seasonal_flight, name="delete_seasonal_flight"),
+    path("seasonal-flights/gantt/", seasonal_gantt_view, name="seasonal_gantt"),
+    path("api/seasonal-gantt-data/", seasonal_gantt_data, name="seasonal_gantt_data"),
 ]
