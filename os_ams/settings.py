@@ -39,7 +39,10 @@ SECRET_KEY = "@)b29q035gdvzr_^1m*^dwn&4t)k5ia+r7#pa6it_dhbf34v1f"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "192.168.1.34", "127.0.0.1", "osams", "139.180.223.0"]
+ALLOWED_HOSTS = ["localhost", "192.168.1.34", "127.0.0.1", "osams", "139.180.223.0", "osams.100-mark.com", "100-mark.com", "www.100-mark.com"]
+
+# CSRF trusted origins for HTTPS
+CSRF_TRUSTED_ORIGINS = ["https://osams.100-mark.com", "https://100-mark.com", "https://www.100-mark.com"]
 
 
 # Application definition
@@ -142,7 +145,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Default primary key field type

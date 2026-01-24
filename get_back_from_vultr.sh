@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Release to Vultr Server
-# Usage: ./release2vultr.sh [--dry-run]
+# Get Code Back from Vultr Server
+# Usage: ./get_back_from_vultr.sh [--dry-run]
 #
-# Syncs local project to Vultr server at /srv/aims/SRC/<project-name>
+# Syncs remote project from Vultr server to local directory
 # Project name is automatically detected from current directory
 #
 
@@ -37,16 +37,16 @@ REMOTE_PATH="${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_BASE_PATH}/${PROJECT_NAME}/"
 
 # Display configuration
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}📤 Releasing to Vultr${NC}"
+echo -e "${GREEN}📥 Getting code back from Vultr${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "  Project:     ${GREEN}${PROJECT_NAME}${NC}"
-echo -e "  Local:       ${BLUE}$(pwd)${NC}"
 echo -e "  Remote:      ${YELLOW}${REMOTE_PATH}${NC}"
+echo -e "  Local:       ${BLUE}$(pwd)${NC}"
 [[ -n "$DRY_RUN" ]] && echo -e "  Mode:        ${YELLOW}DRY RUN${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-# Exclusions
+# Exclusions (don't overwrite local critical files)
 EXCLUDES=(
     '.git'
     '.venv'
@@ -57,6 +57,7 @@ EXCLUDES=(
     '*.log'
     '.env'
     '.env.local'
+    '.env.docker'
     '.DS_Store'
     'node_modules'
     '*.swp'
@@ -81,7 +82,8 @@ done
 
 # Confirm before proceeding (skip in dry-run)
 if [[ -z "$DRY_RUN" ]]; then
-    echo -e "${YELLOW}⚠️  This will sync all files to the remote server.${NC}"
+    echo -e "${YELLOW}⚠️  This will overwrite local files with remote versions.${NC}"
+    echo -e "${YELLOW}⚠️  Your local .env and .venv will be preserved.${NC}"
     read -p "Continue? [y/N] " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -98,12 +100,11 @@ echo ""
 rsync -avz \
     --no-o --no-g \
     --progress \
-    --delete \
     --human-readable \
     --itemize-changes \
     "${EXCLUDE_FLAGS[@]}" \
     $DRY_RUN \
-    . "$REMOTE_PATH"
+    "$REMOTE_PATH" .
 
 EXIT_CODE=$?
 
@@ -113,15 +114,15 @@ if [[ $EXIT_CODE -eq 0 ]]; then
         echo -e "${GREEN}✅ Dry run completed successfully${NC}"
         echo -e "${YELLOW}💡 Run without --dry-run to actually transfer files${NC}"
     else
-        echo -e "${GREEN}✅ Release completed successfully${NC}"
-        echo -e "${BLUE}📦 Project '${PROJECT_NAME}' is now on Vultr${NC}"
+        echo -e "${GREEN}✅ Sync completed successfully${NC}"
+        echo -e "${BLUE}📦 Remote changes from '${PROJECT_NAME}' are now local${NC}"
         echo ""
         echo -e "${YELLOW}Next steps:${NC}"
-        echo -e "  1. SSH into server: ${BLUE}ssh ${REMOTE_USER}@${REMOTE_HOST}${NC}"
-        echo -e "  2. Go to project:   ${BLUE}cd ${REMOTE_BASE_PATH}/${PROJECT_NAME}${NC}"
-        echo -e "  3. Deploy:          ${BLUE}docker-compose up -d${NC}"
+        echo -e "  1. Review changes:  ${BLUE}git status${NC}"
+        echo -e "  2. Test locally:    ${BLUE}docker-compose up -d${NC}"
+        echo -e "  3. Commit changes:  ${BLUE}git add . && git commit${NC}"
     fi
 else
-    echo -e "${RED}❌ Release failed with exit code ${EXIT_CODE}${NC}"
+    echo -e "${RED}❌ Sync failed with exit code ${EXIT_CODE}${NC}"
     exit $EXIT_CODE
 fi
